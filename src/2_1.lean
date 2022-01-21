@@ -8,6 +8,7 @@ variables {F m n: Type*}
   [is_R_or_C F]
   [fintype m] [fintype n]
   [decidable_eq m] [decidable_eq n]
+  [has_lt m] [has_lt n]
 
 theorem thm_2_1_2 (v : n → (euclidean_space F m)) (hon : (orthonormal F v)) :
 linear_independent F v := orthonormal.linear_independent hon
@@ -21,7 +22,7 @@ begin
   apply matrix.mul_eq_one_comm,
 end
 
-theorem thm_2_1_4_a_b (A : matrix n n F) : (is_unitary A) ↔ (is_unit A) ∧ (A⁻¹ = Aᴴ) :=
+theorem thm_2_1_4_a_b (A : matrix n n F) : is_unitary A ↔ (is_unit A) ∧ (A⁻¹ = Aᴴ) :=
 begin
   split,
   intro h,
@@ -44,7 +45,7 @@ begin
   apply matrix.nonsing_inv_mul A h1,
 end
 
-theorem thm_2_1_4_b_c (A : matrix n n F) : ( (is_unit A) ∧ (A⁻¹ = Aᴴ) ) ↔ A ⬝ Aᴴ = 1 :=
+theorem thm_2_1_4_b_c (A : matrix n n F) : (is_unit A) ∧ (A⁻¹ = Aᴴ) ↔ A ⬝ Aᴴ = 1 :=
 begin
   split,
   intro h,
@@ -76,4 +77,33 @@ begin
   exact h,
   rw is_unitary,
   simp,
+end
+
+def cols (A : matrix m n F) :=
+  λ (i : n), (id (Aᵀ i) : (euclidean_space F m))
+
+def has_orthonormal_cols (A : matrix m n F) :=
+  orthonormal F (cols A)
+
+theorem thm_2_1_4_a_e (A : matrix n n F) : is_unitary A ↔ has_orthonormal_cols A :=
+begin
+  sorry
+end
+
+def is_isometry (A : matrix n n F) :=
+  ∀ (x : (euclidean_space F n)), ∥x∥ = ∥matrix.to_lin' A x∥
+
+theorem thm_2_1_4_a_g (A : matrix n n F) : is_unitary A ↔ is_isometry A :=
+begin
+  sorry
+end
+
+def is_upper_triangular (A : matrix n n F) :=
+  ∀ (i j : n), j < i → (A i j = 0)
+
+theorem thm_2_1_14_a (A : matrix m n F) (h : fintype.card m ≤ fintype.card n) :
+  ∃ Q : (matrix m n F), ∃ R : (matrix n n F),
+  (is_upper_triangular R)∧(has_orthonormal_cols Q)∧(A = Q ⬝ R)∧(∀ i : n, is_R_or_C.re (R i i) ≥ 0)∧(∀ i : n, is_R_or_C.im (R i i) = 0) :=
+begin
+  sorry
 end
