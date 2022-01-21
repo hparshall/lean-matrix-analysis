@@ -77,3 +77,48 @@ begin
   rw is_unitary,
   simp,
 end
+
+
+def is_similar_to (A B : matrix n n F) : Prop := ∃ (P : matrix n n F), (P⁻¹ ⬝ P = 1) ∧ (B = P * A * P⁻¹)
+
+theorem thm_2_1_9 (A : matrix n n ℂ) [invertible A] : is_similar_to A⁻¹ Aᴴ ↔ ∃ (B : matrix n n ℂ), (is_unit B) ∧ A = B⁻¹ * Bᴴ :=
+begin
+  split,
+  intro h,
+  cases h with S hS,
+  cases hS with hS₁ hS₂,
+  have : S = Aᴴ ⬝ S ⬝ A,
+  begin
+    simp [hS₂],
+    simp [matrix.mul_assoc],
+    rw ←  matrix.mul_assoc S⁻¹ S  A,
+    rw hS₁,
+    simp,
+  end,
+
+  let Sθ : ℝ → matrix n n ℂ := λ (θ : ℝ), (matrix.scalar n (complex.exp(complex.I * θ))) ⬝ S,
+  have fact₁: ∀(θ : ℝ), Sθ θ = Aᴴ ⬝ (Sθ θ) ⬝ A,
+  begin
+    sorry,
+  end,
+  have fact₂ : ∀(θ : ℝ), (Sθ θ)ᴴ = Aᴴ ⬝ (Sθ θ)ᴴ ⬝ A,
+  begin
+    sorry,
+  end,
+  let Hθ : ℝ → matrix n n ℂ := λ (θ : ℝ), Sθ θ + (Sθ θ)ᴴ,
+  have fact₃ : ∀(θ : ℝ), Hθ θ = Aᴴ ⬝ (Hθ θ) ⬝ A :=
+  begin
+    intro θ,
+    simp [Hθ],
+    rw matrix.mul_add,
+    rw matrix.add_mul,
+    simp [fact₁ θ, fact₂ θ],
+    rw ← fact₁ θ,
+    simp,
+    sorry,
+  end,
+  sorry,
+end
+
+
+#check matrix.scalar n (1 : ℝ)
