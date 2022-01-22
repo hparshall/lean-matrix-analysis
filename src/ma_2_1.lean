@@ -3,7 +3,7 @@ import linear_algebra.dimension
 import linear_algebra.matrix
 import linear_algebra.unitary_group
 
-open_locale matrix
+open_locale big_operators matrix
 
 variables {F m n: Type*}
   [is_R_or_C F]
@@ -129,7 +129,7 @@ def is_isometry (A : matrix n n F) :=
 
 theorem thm_2_1_4_a_g (A : matrix n n F) : is_unitary A ↔ is_isometry A :=
 begin
-  sorry
+  sorry,
 end
 
 def is_similar_to (A B : matrix n n F) : Prop := ∃ (P : matrix n n F), (P⁻¹ ⬝ P = 1) ∧ (B = P * A * P⁻¹)
