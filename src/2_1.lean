@@ -1,4 +1,5 @@
 import analysis.inner_product_space.pi_L2
+import linear_algebra.dimension
 import linear_algebra.matrix
 import linear_algebra.unitary_group
 
@@ -79,20 +80,52 @@ begin
   simp,
 end
 
-#check matrix.scalar n (1 : ℝ)
 def cols (A : matrix m n F) :=
   λ (i : n), (id (Aᵀ i) : (euclidean_space F m))
+
+def rows (A : matrix m n F) :=
+  λ (i : m), (id (A i) : (euclidean_space F n))
 
 def has_orthonormal_cols (A : matrix m n F) :=
   orthonormal F (cols A)
 
+lemma entrywise_unitary (A : matrix n n F) (h: is_unitary A) : (∀ (i : n) (j : n), (Aᴴ ⬝ A) i j =  ite (i = j) 1 0) :=
+begin
+  rw is_unitary at h,
+  rw ← matrix.ext_iff at h,
+  intros i j,
+  rw ← matrix.one_apply,
+  apply h,
+end
+
+lemma entrywise_inner (A : matrix m n F) : ∀ i j : n, inner (cols A i) (cols A j) = (Aᴴ ⬝ A) i j :=
+begin
+  intros i j,
+  ring,
+end
+
 theorem thm_2_1_4_a_e (A : matrix n n F) : is_unitary A ↔ has_orthonormal_cols A :=
 begin
-  sorry
+  split,
+  intro h,
+  rw has_orthonormal_cols,
+  rw orthonormal_iff_ite,
+  apply entrywise_unitary A,
+  exact h,
+  intro h,
+  rw has_orthonormal_cols at h,
+  rw orthonormal_iff_ite at h,
+  rw is_unitary,
+  ext,
+  specialize h i j,
+  have fact₁ : inner (cols A i) (cols A j) = (Aᴴ ⬝ A) i j, by apply entrywise_inner,
+  rw ← fact₁,
+  rw matrix.one_apply,
+  exact h,
 end
 
 def is_isometry (A : matrix n n F) :=
-  ∀ (x : (euclidean_space F n)), ∥x∥ = ∥matrix.to_lin' A x∥
+  ∀ (x : (euclidean_space F n)), ∥x∥^2 = ∥ (id (matrix.to_lin' A x) : (euclidean_space F n) ) ∥^2
 
 theorem thm_2_1_4_a_g (A : matrix n n F) : is_unitary A ↔ is_isometry A :=
 begin
@@ -142,13 +175,43 @@ begin
 end
 
 
-
 def is_upper_triangular (A : matrix n n F) :=
   ∀ (i j : n), j < i → (A i j = 0)
 
 theorem thm_2_1_14_a (A : matrix m n F) (h : fintype.card m ≤ fintype.card n) :
   ∃ Q : (matrix m n F), ∃ R : (matrix n n F),
-  (is_upper_triangular R)∧(has_orthonormal_cols Q)∧(A = Q ⬝ R)∧(∀ i : n, is_R_or_C.re (R i i) ≥ 0)∧(∀ i : n, is_R_or_C.im (R i i) = 0) :=
+  (is_upper_triangular R)
+    ∧(has_orthonormal_cols Q)
+    ∧(A = Q ⬝ R)
+    ∧(∀ i : n, is_R_or_C.re (R i i) ≥ 0)
+    ∧(∀ i : n, is_R_or_C.im (R i i) = 0) :=
 begin
   sorry
+end
+
+theorem thm_2_1_18 (X : matrix n n F) (Y : matrix n n F)
+  (hx : has_orthonormal_cols X) (hy : has_orthonormal_cols Y) :
+  ∃ (U : matrix n n F), (is_unitary U)∧(Y = U ⬝ X) :=
+begin
+  use Y ⬝ (X⁻¹),
+  rw ← thm_2_1_4_a_e at hx,
+  rw ← thm_2_1_4_a_e at hy,
+  rw thm_2_1_4_a_b at hx,
+  rw hx.2,
+  rw ← thm_2_1_4_a_b at hx,
+  split,
+  rw is_unitary,
+  simp,
+  rw is_unitary at hy,
+  rw matrix.mul_assoc,
+  rw ← matrix.mul_assoc Yᴴ Y Xᴴ,
+  rw hy,
+  simp,
+  rw ← thm_2_1_4_b_c,
+  rw ← thm_2_1_4_a_b,
+  exact hx,
+  rw is_unitary at hx,
+  rw matrix.mul_assoc,
+  rw hx,
+  simp,
 end
