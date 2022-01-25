@@ -3,6 +3,7 @@ import analysis.inner_product_space.basic
 import analysis.inner_product_space.pi_L2
 import analysis.inner_product_space.spectrum
 import analysis.normed_space.pi_Lp
+import .lemmas.ladr_7_lem
 
 variable {n : ℕ}
 
@@ -34,7 +35,31 @@ end
 lemma lem_7_14 (T : module.End ℂ (euclidean_space ℂ (fin n)))
   (h : ∀ v : (euclidean_space ℂ (fin n)), ⟪T v, v⟫_ℂ = 0) : T = 0 :=
 begin
-  sorry,
+  have calculation : ∀ u w : (euclidean_space ℂ (fin n)), 
+    4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ :=
+    begin
+      intros u w,
+      ring_nf,
+      sorry,
+    end,
+  have : ∀ u w : (euclidean_space ℂ (fin n)), 4 • ⟪T u, w ⟫_ℂ = 0 :=
+    begin
+      intros u w,
+      calc 4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : calculation u w
+      ...                  = - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : by {rw h (u + w), ring}
+      ...                  = complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : by {rw h (u - w), ring}
+      ...                  = - (complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ) : by {rw h (u + complex.I • w), rw smul_zero, ring}
+      ...                  = 0 : by {rw h (u - complex.I • w), rw smul_zero, ring},
+    end,
+  apply linear_map.ext,
+  intro x,
+  specialize this x,
+  have : T x = 0,
+  begin
+    apply inner_with_all_eq_zero_eq_zero,
+    intro u,
+    
+  end
 end
 
 lemma lem_7_15_eq (T : module.End ℂ (euclidean_space ℂ (fin n)))
