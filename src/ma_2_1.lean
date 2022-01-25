@@ -80,6 +80,17 @@ begin
   simp,
 end
 
+theorem thm_2_1_4_a_d (A : matrix n n F) : is_unitary A ↔ is_unitary Aᴴ :=
+begin
+  split,
+  rw thm_2_1_4_a_b,
+  rw thm_2_1_4_b_c,
+  exact (thm_2_1_4_c_d A).1,
+  rw ← thm_2_1_4_c_d,
+  rw ← thm_2_1_4_b_c,
+  exact (thm_2_1_4_a_b A).2,
+end
+
 def cols (A : matrix m n F) :=
   λ (i : n), (id (Aᵀ i) : (euclidean_space F m))
 
@@ -149,7 +160,8 @@ begin
   {sorry},
 end
 
-def is_similar_to (A B : matrix n n F) : Prop := ∃ (P : matrix n n F), (P⁻¹ ⬝ P = 1) ∧ (B = P * A * P⁻¹)
+def is_similar_to (A B : matrix n n F) : Prop := ∃ P : matrix n n F, ((P⁻¹ ⬝ P = 1) ∧ (B = P ⬝ A ⬝ P⁻¹))
+
 
 theorem thm_2_1_9 (A : matrix n n ℂ) [invertible A] : is_similar_to A⁻¹ Aᴴ ↔ ∃ (B : matrix n n ℂ), (is_unit B) ∧ A = B⁻¹ * Bᴴ :=
 begin
@@ -187,7 +199,38 @@ begin
     simp,
     sorry,
   end,
+
   sorry,
+
+  sorry,
+end
+
+variables A S : matrix n n ℂ
+variable [S = Aᴴ ⬝ S ⬝ A]
+
+noncomputable def Sθ : ℝ → matrix n n ℂ := λ (θ : ℝ), (matrix.scalar n (complex.exp(complex.I * θ))) ⬝ S
+noncomputable def Hθ : ℝ → matrix n n ℂ := λ (θ : ℝ), (Sθ S θ) + (Sθ S θ)ᴴ
+
+lemma fact₁: ∀(θ : ℝ), Sθ S θ = Aᴴ ⬝ (Sθ S θ) ⬝ A :=
+begin
+  sorry,
+end
+lemma fact₂ : ∀(θ : ℝ), (Sθ S θ)ᴴ = Aᴴ ⬝ (Sθ S θ)ᴴ ⬝ A :=
+begin
+  sorry,
+end
+
+#check fact₁
+lemma fact₃ : ∀ (θ : ℝ), Hθ S θ = Aᴴ ⬝ (Hθ S θ) ⬝ A :=
+begin
+  intro θ,
+  simp [Hθ],
+  rw matrix.mul_add,
+  rw matrix.add_mul,
+  unfold Sθ,
+  simp,
+  rw ← _inst_8,
+  -- rw ← fact₂ A S 0 (by simp),
   sorry,
 end
 
