@@ -9,20 +9,20 @@ variable {n : ℕ}
 
 open_locale big_operators complex_conjugate matrix
 
-lemma self_adjoint_iff (T : module.End ℂ (euclidean_space ℂ (fin n))) :
+lemma self_adjoint_iff (T : Lℂ^n) :
   inner_product_space.is_self_adjoint T ↔ T = T.adjoint :=
 begin
    rw linear_map.eq_adjoint_iff,
    rw inner_product_space.is_self_adjoint,
 end
 
-lemma lem_7_10 (T : module.End ℂ (euclidean_space ℂ (fin n))) :
+lemma lem_7_10 (T : Lℂ^n) :
   (linear_map.to_matrix' T.adjoint) = (linear_map.to_matrix' T)ᴴ :=
 begin
   sorry,
 end
 
-lemma lem_7_13 (T : module.End ℂ (euclidean_space ℂ (fin n)))
+lemma lem_7_13 (T : Lℂ^n)
   (hT : inner_product_space.is_self_adjoint T):
   ∀ (μ : ℂ) (h : T.has_eigenvalue μ), conj μ = μ :=
 begin
@@ -32,17 +32,17 @@ begin
     hT h,
 end
 
-lemma lem_7_14 (T : module.End ℂ (euclidean_space ℂ (fin n)))
-  (h : ∀ v : (euclidean_space ℂ (fin n)), ⟪T v, v⟫_ℂ = 0) : T = 0 :=
+lemma lem_7_14 (T : Lℂ^n)
+  (h : ∀ v : ℂ^n, ⟪T v, v⟫_ℂ = 0) : T = 0 :=
 begin
-  have calculation : ∀ u w : (euclidean_space ℂ (fin n)), 
+  have calculation : ∀ u w : ℂ^n, 
     4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ :=
     begin
       intros u w,
       ring_nf,
       sorry,
     end,
-  have : ∀ u w : (euclidean_space ℂ (fin n)), 4 • ⟪T u, w ⟫_ℂ = 0 :=
+  have : ∀ u w : ℂ^n, 4 • ⟪T u, w ⟫_ℂ = 0 :=
     begin
       intros u w,
       calc 4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : calculation u w
@@ -62,8 +62,8 @@ begin
   end
 end
 
-lemma lem_7_15_eq (T : module.End ℂ (euclidean_space ℂ (fin n)))
-  (v : (euclidean_space ℂ (fin n))) :
+lemma lem_7_15_eq (T : Lℂ^n)
+  (v : ℂ^n) :
   ⟪T v, v⟫_ℂ - conj ⟪T v, v⟫_ℂ = ⟪ (T - T.adjoint) v, v⟫_ℂ :=
 begin
   rw inner_conj_sym,
@@ -72,9 +72,9 @@ begin
   simp,
 end
 
-lemma lem_7_15 (T : module.End ℂ (euclidean_space ℂ (fin n))) :
+lemma lem_7_15 (T : Lℂ^n) :
   inner_product_space.is_self_adjoint T ↔
-  ∀ v : (euclidean_space ℂ (fin n)), conj ⟪T v, v⟫_ℂ = ⟪T v, v⟫_ℂ :=
+  ∀ v : ℂ^n, conj ⟪T v, v⟫_ℂ = ⟪T v, v⟫_ℂ :=
 begin
   split,
   {
@@ -113,27 +113,27 @@ begin
   },
 end
 
-def is_normal (T : module.End ℂ (euclidean_space ℂ (fin n))) :=
+def is_normal (T : Lℂ^n) :=
   T*(T.adjoint) = (T.adjoint)*T
 
-lemma lem_7_20 (T : module.End ℂ (euclidean_space ℂ (fin n))) :
+lemma lem_7_20 (T : Lℂ^n) :
   (is_normal T) ↔
-  ∀ v : (euclidean_space ℂ (fin n)),
+  ∀ v : ℂ^n,
     ∥T v∥ = ∥(linear_map.adjoint T) v∥ :=
   begin
     sorry,
   end
 
-lemma lem_7_21 (T : module.End ℂ (euclidean_space ℂ (fin n)))
-  (μ : ℂ) (v : (euclidean_space ℂ (fin n)))
+lemma lem_7_21 (T : Lℂ^n)
+  (μ : ℂ) (v : ℂ^n)
   (hT : is_normal T) (hv : T.has_eigenvector μ v) :
   module.End.has_eigenvector (T.adjoint) (conj μ) v :=
 begin
   sorry,
 end
 
-lemma lem_7_22 (T : module.End ℂ (euclidean_space ℂ (fin n)))
-  (μ₁ μ₂ : ℂ) (v₁ v₂ : (euclidean_space ℂ (fin n)))
+lemma lem_7_22 (T : Lℂ^n)
+  (μ₁ μ₂ : ℂ) (v₁ v₂ : ℂ^n)
   (hT : is_normal T) (hμ₁ : T.has_eigenvector μ₁ v₁) (hμ₂ : T.has_eigenvector μ₂ v₂)
   (hneq : μ₁ ≠ μ₂) : ⟪v₁,v₂⟫_ℂ = 0 :=
 begin

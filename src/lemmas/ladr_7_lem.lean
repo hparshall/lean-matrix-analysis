@@ -8,8 +8,12 @@ variable n : ℕ
 def C : Type := euclidean_space ℂ (fin n)
 
 notation `C` n := euclidean_space ℂ (fin n)
+notation `ℂ^` n := euclidean_space ℂ (fin n)
+notation `Lℂ^` n := module.End ℂ ℂ^n
 
-#check C n
+variable T : module.End ℂ ℂ^n
+
+#check T
 
 example (v : C n) : v = v :=
 begin
