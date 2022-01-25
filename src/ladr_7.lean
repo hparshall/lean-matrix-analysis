@@ -87,3 +87,30 @@ begin
     exact hv,
   },
 end
+
+def is_normal (T : module.End ℂ (euclidean_space ℂ (fin n))) :=
+  T*(T.adjoint) = (T.adjoint)*T
+
+lemma lem_7_20 (T : module.End ℂ (euclidean_space ℂ (fin n))) :
+  (is_normal T) ↔
+  ∀ v : (euclidean_space ℂ (fin n)),
+    ∥T v∥ = ∥(linear_map.adjoint T) v∥ :=
+  begin
+    sorry,
+  end
+
+lemma lem_7_21 (T : module.End ℂ (euclidean_space ℂ (fin n)))
+  (μ : ℂ) (v : (euclidean_space ℂ (fin n)))
+  (hT : is_normal T) (hv : T.has_eigenvector μ v) :
+  module.End.has_eigenvector (T.adjoint) (conj μ) v :=
+begin
+  sorry,
+end
+
+lemma lem_7_22 (T : module.End ℂ (euclidean_space ℂ (fin n)))
+  (μ₁ μ₂ : ℂ) (v₁ v₂ : (euclidean_space ℂ (fin n)))
+  (hT : is_normal T) (hμ₁ : T.has_eigenvector μ₁ v₁) (hμ₂ : T.has_eigenvector μ₂ v₂)
+  (hneq : μ₁ ≠ μ₂) : ⟪v₁,v₂⟫_ℂ = 0 :=
+begin
+  sorry,
+end
