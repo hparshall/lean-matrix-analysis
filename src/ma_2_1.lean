@@ -124,12 +124,29 @@ begin
   exact h,
 end
 
-def is_isometry (A : matrix n n F) :=
-  ∀ (x : (euclidean_space F n)), ∥x∥^2 = ∥ (id (matrix.to_lin' A x) : (euclidean_space F n) ) ∥^2
+def is_isometry (A : matrix n n ℂ) :=
+  ∀ (x : (euclidean_space ℂ n)), ∥x∥^2 = ∥ (id (matrix.to_lin' A x) : (euclidean_space ℂ n)) ∥^2
 
-theorem thm_2_1_4_a_g (A : matrix n n F) : is_unitary A ↔ is_isometry A :=
+theorem thm_2_1_4_a_g (A : matrix n n ℂ) : is_unitary A ↔ is_isometry A :=
 begin
-  sorry,
+  split,
+  intro h,
+  rw is_isometry,
+  intro x,
+  rw pi_Lp.norm_eq_of_L2,
+  rw pi_Lp.norm_eq_of_L2,
+  rw real.sq_sqrt,
+  rw real.sq_sqrt,
+  {sorry},
+  apply finset.sum_nonneg,
+  simp,
+  intro i,
+  apply sq_nonneg,
+  apply finset.sum_nonneg,
+  simp,
+  intro i,
+  apply sq_nonneg,
+  {sorry},
 end
 
 def is_similar_to (A B : matrix n n F) : Prop := ∃ (P : matrix n n F), (P⁻¹ ⬝ P = 1) ∧ (B = P * A * P⁻¹)
