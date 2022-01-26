@@ -13,7 +13,7 @@ open_locale big_operators complex_conjugate matrix
 notation `is_sa` := inner_product_space.is_self_adjoint
 
 def is_positive (T : Lℂ^n) :=
-  (∀ x : ℂ^n, ((⟪T x, x⟫_ℂ).re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
+  (∀ x : ℂ^n, ((is_R_or_C.re (⟪T x, x⟫_ℂ)) ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
 
 theorem thm_7_35_a_b (T : Lℂ^n) (hsa : is_sa T):
   is_positive T → (∀ (μ : ℂ), (T.has_eigenvalue μ) → (μ.re ≥ 0 ∧ μ.im = 0)) :=
