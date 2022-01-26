@@ -32,3 +32,15 @@ begin
   exact this h,
 end
 
+lemma comp_eq_mul (A B : Lℂ^n) (v : ℂ^n) : A (B v) = (A * B) v := by {simp}
+lemma comp_eq_mul' (A B : Lℂ^n) (v : ℂ^n) : (A.comp B) v = A (B v) := by {simp}
+lemma comp_eq_mul'' (A B : Lℂ^n) : (A.comp B) = A * B := by {ext, rw ← comp_eq_mul, rw comp_eq_mul', rw ← comp_eq_mul, rw comp_eq_mul'}
+
+lemma adjoint_prod (A B : Lℂ^n) : (A * B)† = B† * A† :=
+begin
+  rw ← comp_eq_mul'',
+  rw linear_map.adjoint_comp,
+  rw comp_eq_mul'',
+end
+
+lemma sub_adjoint (A B : Lℂ^n) : (A - B)† = A† - B† := by {simp}
