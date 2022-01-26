@@ -13,7 +13,7 @@ open_locale big_operators complex_conjugate matrix
 notation `is_sa` := inner_product_space.is_self_adjoint
 
 def is_positive (T : Lℂ^n) :=
-  (∀ x : ℂ^n, ((is_R_or_C.re (⟪T x, x⟫_ℂ)) ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
+  (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
 
 theorem thm_7_35_a_b (T : Lℂ^n) (hsa : is_sa T):
   is_positive T → (∀ (μ : ℂ), (T.has_eigenvalue μ) → (μ.re ≥ 0 ∧ μ.im = 0)) :=
@@ -21,9 +21,7 @@ begin
   intro hpos,
   intros μ hμ,
   have ev : ∃(v : ℂ^n), T.has_eigenvector μ v :=
-  begin
-    exact module.End.has_eigenvalue.exists_has_eigenvector hμ,
-  end,
+    by exact module.End.has_eigenvalue.exists_has_eigenvector hμ,
   cases ev with v hv,
   have eq : (⟪T v, v⟫_ℂ) = (conj μ) * ∥ v ∥^2 :=
   begin
@@ -31,14 +29,33 @@ begin
     rw inner_smul_left,
     rw inner_self_eq_norm_sq_to_K,
   end,
-  have μ_is_real : μ.im = 0 :=
-  begin
-    sorry,
-  end,
-  have μ_is_nn : μ.re ≥ 0 :=
-  begin
-    sorry,
-  end,
+  rw complex.ext_iff at eq,
+  cases eq with hre him,
+  rw is_positive at hpos,
+  specialize hpos v,
+  cases hpos with hnn himz,
+  rw himz at him,
+  rw complex.mul_im at him,
+  norm_cast at him,
+  simp at him,
+  rw module.End.has_eigenvector at hv,
+  have muim : μ.im = 0 := by tauto,
+  split,
+  rw hre at hnn,
+  norm_cast at hnn,
+  rw complex.mul_re at hnn,
+  norm_cast at hnn,
+  simp at hnn,
+  rw ← div_le_iff at hnn,
+  simp at hnn,
+  norm_cast,
+  exact hnn,
+  cases hv with eig nz,
+  rw ← real.sqrt_ne_zero',
+  simp,
+  simp at nz,
+  exact nz,
+  exact muim,
 end
 
 theorem thm_7_35_b_c (T : Lℂ^n) (hsa : is_sa T):
