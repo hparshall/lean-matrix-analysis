@@ -7,7 +7,9 @@ import .lemmas.ladr_7_lem
 
 variable {n : ℕ}
 
-open_locale big_operators complex_conjugate matrix
+localized "postfix `†`:1000 := linear_map.adjoint" in src
+
+open_locale big_operators complex_conjugate matrix 
 
 lemma self_adjoint_iff (T : Lℂ^n) :
   inner_product_space.is_self_adjoint T ↔ T = T.adjoint :=
@@ -58,8 +60,14 @@ begin
   begin
     apply inner_with_all_eq_zero_eq_zero,
     intro u,
-    
-  end
+    calc ⟪u, (T x)⟫_ℂ = conj ⟪(T x), u⟫_ℂ : by {rw ← inner_conj_sym}
+    ...                = (1 / 4) • (4 • conj ⟪(T x), u⟫_ℂ ) : by {sorry}
+    ...                = (1 / 4) • conj (4 • ⟪(T x), u⟫_ℂ ) : by {sorry}
+    ...                = (1 / 4) • conj 0 : by {rw this u}
+    ...                = 0 : by {simp},
+  end,
+  rw this,
+  simp,
 end
 
 lemma lem_7_15_eq (T : Lℂ^n)
@@ -121,8 +129,43 @@ lemma lem_7_20 (T : Lℂ^n) :
   ∀ v : ℂ^n,
     ∥T v∥ = ∥(linear_map.adjoint T) v∥ :=
   begin
-    sorry,
+    split,
+    intros hT v,
+    -- have fact₁: (T * (T.adjoint)) v - ((T.adjoint * T) v) = 0 :=
+    -- begin
+    --   rw is_normal at hT,
+    --   rw hT,
+    --   rw sub_self,
+    -- end,
+    -- have fact₂ : ⟪(T * (T.adjoint)) v - ((T.adjoint * T) v), v ⟫_ℂ = 0 :=
+    -- begin
+    --   rw fact₁,
+    --   rw inner_zero_left,
+    -- end,
+    have fact₃ : ⟪ (T * T.adjoint) v, v ⟫_ℂ = ⟪ (T.adjoint * T) v, v ⟫_ℂ :=
+    begin
+      sorry
+      -- rw inner_sub_left at fact₂,
+      -- rw eq_add_of_sub_eq fact₂,
+      -- ring,
+    end,
+    have fact₄ : (∥ T v ∥^2 : ℂ ) = (∥ T v ∥^2 : ℂ) :=
+    begin
+      calc (∥ T v ∥^2 : ℂ) = ⟪ T v , T v ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
+      -- ...            =  ⟪ (T†) (T v), v ⟫_ℂ : by {rw linear_map.adjoint_inner_left T}
+      -- ...            =  ⟪ ((T†) * T) v, v ⟫_ℂ : by {sorry} ---{simp} (works)
+      -- ...            =  ⟪ (T * T†) v, v ⟫_ℂ : by {rw fact₃}
+      ...            =  ⟪ T ((T†) v), v ⟫_ℂ : by {sorry} ---{rw linear_map.adjoint_adjoint, simp}
+      ...            = ⟪ (T† ) v, (T† ) v ⟫_ℂ : by {rw linear_map.adjoint_inner_right}
+      ...            = ∥ (T†) v ∥^2 : by {rw inner_self_eq_norm_sq_to_K},
+    end,
+    sorry
   end
+
+example (u v : ℂ^ n) : ⟪ u , u ⟫_ℂ = ∥ u ∥^2 :=
+begin
+  rw inner_self_eq_norm_sq_to_K,
+end
 
 lemma lem_7_21 (T : Lℂ^n)
   (μ : ℂ) (v : ℂ^n)
