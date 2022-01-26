@@ -9,7 +9,7 @@ variable {n : ℕ}
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 
-open_locale big_operators complex_conjugate matrix 
+open_locale big_operators complex_conjugate matrix
 
 lemma self_adjoint_iff (T : Lℂ^n) :
   inner_product_space.is_self_adjoint T ↔ T = T.adjoint :=
@@ -37,7 +37,7 @@ end
 lemma lem_7_14 (T : Lℂ^n)
   (h : ∀ v : ℂ^n, ⟪T v, v⟫_ℂ = 0) : T = 0 :=
 begin
-  have calculation : ∀ u w : ℂ^n, 
+  have calculation : ∀ u w : ℂ^n,
     4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ :=
     begin
       intros u w,
@@ -81,8 +81,8 @@ begin
 end
 
 lemma lem_7_15 (T : Lℂ^n) :
-  inner_product_space.is_self_adjoint T ↔
-  ∀ v : ℂ^n, conj ⟪T v, v⟫_ℂ = ⟪T v, v⟫_ℂ :=
+  inner_product_space.is_self_adjoint T
+    ↔ ∀ v : ℂ^n, conj ⟪T v, v⟫_ℂ = ⟪T v, v⟫_ℂ :=
 begin
   split,
   {
