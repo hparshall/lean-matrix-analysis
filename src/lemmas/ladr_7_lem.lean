@@ -15,8 +15,6 @@ localized "postfix `†`:1000 := linear_map.adjoint" in src
 
 variable T : module.End ℂ ℂ^n
 
-#check T†
-
 example (v : ℂ^n) : v = v :=
 begin
   exact rfl,
@@ -31,3 +29,16 @@ begin
   rw inner_self_eq_zero at h,
   exact this h,
 end
+
+lemma comp_eq_mul (A B : Lℂ^n) (v : ℂ^n) : A (B v) = (A * B) v := by {simp}
+lemma comp_eq_mul' (A B : Lℂ^n) (v : ℂ^n) : (A.comp B) v = A (B v) := by {simp}
+lemma comp_eq_mul'' (A B : Lℂ^n) : (A.comp B) = A * B := by {ext, rw ← comp_eq_mul, rw comp_eq_mul', rw ← comp_eq_mul, rw comp_eq_mul'}
+
+lemma adjoint_prod (A B : Lℂ^n) : (A * B)† = B† * A† :=
+begin
+  rw ← comp_eq_mul'',
+  rw linear_map.adjoint_comp,
+  rw comp_eq_mul'',
+end
+
+lemma sub_adjoint (A B : Lℂ^n) : (A - B)† = A† - B† := by {simp}
