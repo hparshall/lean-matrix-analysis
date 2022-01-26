@@ -17,13 +17,13 @@ variable T : module.End ℂ ℂ^n
 
 #check T†
 
-example (v : C n) : v = v :=
+example (v : ℂ^n) : v = v :=
 begin
   exact rfl,
 end
 
 
-lemma inner_with_all_eq_zero_eq_zero (v : ℂ^ n) : (∀ u : C n, ⟪u, v⟫_ℂ = 0) → v = 0 :=
+lemma inner_with_all_eq_zero_eq_zero (v : ℂ^ n) : (∀ u : ℂ^n, ⟪u, v⟫_ℂ = 0) → v = 0 :=
 begin
   intro h,
   by_contra',
@@ -31,4 +31,3 @@ begin
   rw inner_self_eq_zero at h,
   exact this h,
 end
-
