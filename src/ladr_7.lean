@@ -34,6 +34,57 @@ begin
     hT h,
 end
 
+example (T : Lℂ^n) (v w : ℂ^n): T (v + w) = T v + T w :=
+begin
+  exact map_add T v w,
+end
+
+lemma lemma_7_14_a (T : Lℂ^n) : ∀ u w : ℂ^n,
+    4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ :=
+begin
+  intros u w,
+  rw map_add,
+  rw map_add,
+  rw map_sub,
+  rw map_sub,
+  rw linear_map.map_smul,
+  rw inner_sub_right,
+  rw inner_sub_right,
+  rw inner_add_right,
+  rw inner_add_right,
+  rw inner_add_left,
+  rw inner_add_left,
+  rw inner_sub_left,
+  rw inner_sub_left,
+  rw inner_add_left,
+  rw inner_add_left,
+  rw inner_sub_left,
+  rw inner_sub_left,
+  rw inner_smul_left,
+  rw inner_smul_left,
+  rw inner_smul_right,
+  rw inner_smul_right,
+  ring_nf,
+  rw complex.conj_I,
+  ring_nf,
+  ring_nf,
+  sorry,
+end
+
+--- Trying to do this calculation directly now
+example (T : Lℂ^n) (u w : ℂ^n): ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I • ⟪T (u + I • w) , u + I • w⟫_ℂ - I • ⟪T (u - I • w), u - I • w ⟫_ℂ = 4 * ⟪ T u, w ⟫_ℂ :=
+begin
+  calc ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I • ⟪T (u + I • w) , u + I • w⟫_ℂ - I • ⟪T (u - I • w), u - I • w ⟫_ℂ
+      = ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ - (⟪T u, u⟫_ℂ - ⟪T w, u⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ) + I * (⟪T u, u⟫_ℂ + I * ⟪T u, w⟫_ℂ + I * ⟪T w, u⟫_ℂ - ⟪T w, w⟫_ℂ) - I * (⟪T u, u⟫_ℂ - I * ⟪T w, u⟫_ℂ - I * ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ) : by {
+  rw [map_add, map_add, map_sub, map_sub, linear_map.map_smul, inner_sub_right, inner_sub_right, inner_add_right, inner_add_right, inner_add_left, inner_add_left],
+  ring_nf,
+  sorry
+      }
+  -- ... = 2 * ⟪T w, u⟫_ℂ + 2 * ⟪T u, w⟫_ℂ + (I * ⟪T u, u⟫_ℂ - ⟪T u, w⟫_ℂ - ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ) - (I * ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ) : by {}
+  -- ... = 2 * ⟪T w, u⟫_ℂ + 2 * ⟪T u, w⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ - (⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ) : by {}
+  ...  = 4 * ⟪ T u , w⟫_ℂ : by {sorry},
+end
+
 lemma lem_7_14 (T : Lℂ^n)
   (h : ∀ v : ℂ^n, ⟪T v, v⟫_ℂ = 0) : T = 0 :=
 begin
@@ -123,7 +174,7 @@ end
 
 lemma lem_7_16 (T : Lℂ^n) (hT : T = T†) (hInner : ∀ v : ℂ^n, ⟪ T v , v ⟫_ℂ = 0) : T = 0 :=
 begin
-  sorry,
+  exact lem_7_14 _ hInner,
 end
 
 def is_normal (T : Lℂ^n) :=
