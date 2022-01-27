@@ -11,6 +11,8 @@ notation `C` n := euclidean_space ℂ (fin n)
 notation `ℂ^` n := euclidean_space ℂ (fin n)
 notation `Lℂ^` n := module.End ℂ ℂ^n
 
+notation `I` := complex.I
+
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 
 variable T : module.End ℂ ℂ^n

@@ -54,20 +54,16 @@ begin
   rw self_adjoint_iff,
   rw linear_map.eq_adjoint_iff,
   intros x y,
-  have fact₀ : (T.adjoint * T) x = (linear_map.adjoint T) (T x) :=
-  begin
-    simp,
-  end,
   have fact₁ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪T x, T y⟫_ℂ :=
   begin
-    rw fact₀,
+    rw ← comp_eq_mul,
     rw linear_map.adjoint_inner_left,
   end,
   have fact₂ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪x, (T.adjoint * T) y⟫_ℂ :=
   begin
     rw fact₁,
     rw ← linear_map.adjoint_inner_right,
-    simp,
+    rw comp_eq_mul,
   end,
   exact fact₂,
 end
@@ -83,13 +79,9 @@ begin
   intro v,
   split,
   {
-    have fact₀ : (T.adjoint * T) v = (linear_map.adjoint T) (T v) :=
-    begin
-      simp,
-    end,
     have fact₁ : ⟪(T.adjoint * T) v, v⟫_ℂ = ⟪T v, T v⟫_ℂ :=
     begin
-      rw fact₀,
+      rw ← comp_eq_mul,
       rw linear_map.adjoint_inner_left,
     end,
     rw fact₁,
