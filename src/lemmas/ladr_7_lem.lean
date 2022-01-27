@@ -43,4 +43,6 @@ begin
   rw comp_eq_mul'',
 end
 
+lemma mul_adjoint (A B : Lℂ^n) : (A * B)† = B† * A† := adjoint_prod n A B
+
 lemma sub_adjoint (A B : Lℂ^n) : (A - B)† = A† - B† := by {simp}

@@ -34,75 +34,59 @@ begin
     hT h,
 end
 
-example (T : Lℂ^n) (v w : ℂ^n): T (v + w) = T v + T w :=
+lemma inner_map_add_add (T : Lℂ^n) (u w : ℂ^n) : ⟪ T (u + w), u + w ⟫_ℂ = ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ :=
 begin
-  exact map_add T v w,
+  rw map_add,
+  rw [inner_add_left, inner_add_right, inner_add_right],
+  ring,
 end
 
-lemma lemma_7_14_a (T : Lℂ^n) : ∀ u w : ℂ^n,
-    4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ :=
+lemma inner_map_sub_sub (T : Lℂ^n) (u w : ℂ^n) : ⟪ T (u - w), u - w ⟫_ℂ = ⟪T u, u⟫_ℂ - ⟪T w, u⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ :=
 begin
-  intros u w,
-  rw map_add,
-  rw map_add,
   rw map_sub,
-  rw map_sub,
-  rw linear_map.map_smul,
-  rw inner_sub_right,
-  rw inner_sub_right,
-  rw inner_add_right,
-  rw inner_add_right,
-  rw inner_add_left,
-  rw inner_add_left,
-  rw inner_sub_left,
-  rw inner_sub_left,
-  rw inner_add_left,
-  rw inner_add_left,
-  rw inner_sub_left,
-  rw inner_sub_left,
-  rw inner_smul_left,
-  rw inner_smul_left,
-  rw inner_smul_right,
-  rw inner_smul_right,
-  ring_nf,
-  rw complex.conj_I,
-  ring_nf,
-  ring_nf,
-  sorry,
+  rw [inner_sub_left, inner_sub_right, inner_sub_right],
+  ring,
 end
 
 --- Trying to do this calculation directly now
-example (T : Lℂ^n) (u w : ℂ^n): ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I • ⟪T (u + I • w) , u + I • w⟫_ℂ - I • ⟪T (u - I • w), u - I • w ⟫_ℂ = 4 * ⟪ T u, w ⟫_ℂ :=
+lemma lem_7_14_a (T : Lℂ^n) (u w : ℂ^n): ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I * ⟪T (u + I • w) , u + I • w⟫_ℂ - I * ⟪T (u - I • w), u - I • w ⟫_ℂ = 4 * ⟪ T w, u ⟫_ℂ :=
 begin
-  calc ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I • ⟪T (u + I • w) , u + I • w⟫_ℂ - I • ⟪T (u - I • w), u - I • w ⟫_ℂ
-      = ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ - (⟪T u, u⟫_ℂ - ⟪T w, u⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ) + I * (⟪T u, u⟫_ℂ + I * ⟪T u, w⟫_ℂ + I * ⟪T w, u⟫_ℂ - ⟪T w, w⟫_ℂ) - I * (⟪T u, u⟫_ℂ - I * ⟪T w, u⟫_ℂ - I * ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ) : by {
-  rw [map_add, map_add, map_sub, map_sub, linear_map.map_smul, inner_sub_right, inner_sub_right, inner_add_right, inner_add_right, inner_add_left, inner_add_left],
-  ring_nf,
-  sorry
+  calc ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I * ⟪T (u + I • w) , u + I • w⟫_ℂ - I * ⟪T (u - I • w), u - I • w ⟫_ℂ
+      = ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ - ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ - ⟪T w, w⟫_ℂ + I * ⟪T u, u⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ - I * ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ - ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ : by 
+      {
+        rw [inner_map_add_add, inner_map_add_add],
+        rw [inner_map_sub_sub, inner_map_sub_sub],
+        ring_nf,
+        rw linear_map.map_smul,
+        rw [inner_smul_left, inner_smul_right],
+        rw [complex.conj_I, add_mul _ _ I, mul_comm _ I, ← mul_assoc I _ _, mul_comm I 2, ← mul_assoc (2 * I) _ _],
+        ring_nf,
+        rw complex.I_sq,
+        ring_nf,
       }
-  -- ... = 2 * ⟪T w, u⟫_ℂ + 2 * ⟪T u, w⟫_ℂ + (I * ⟪T u, u⟫_ℂ - ⟪T u, w⟫_ℂ - ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ) - (I * ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ) : by {}
-  -- ... = 2 * ⟪T w, u⟫_ℂ + 2 * ⟪T u, w⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ - (⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ) : by {}
-  ...  = 4 * ⟪ T u , w⟫_ℂ : by {sorry},
+  ...  = 4 * ⟪ T w , u⟫_ℂ : by
+  {
+    ring_nf,
+  },
 end
+
+lemma lem_7_14_b (T : Lℂ^n) : ∀ u w : ℂ^n,
+    4 * ⟪T w, u ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I * ⟪T (u + I • w) , u + I • w⟫_ℂ - I * ⟪T (u - I • w), u - I • w ⟫_ℂ :=
+begin
+  intros u w,
+  rw lem_7_14_a,
+end
+
 
 lemma lem_7_14 (T : Lℂ^n)
   (h : ∀ v : ℂ^n, ⟪T v, v⟫_ℂ = 0) : T = 0 :=
 begin
-  have calculation : ∀ u w : ℂ^n,
-    4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ :=
+  have : ∀ u w : ℂ^n, 4 * ⟪T u, w ⟫_ℂ = 0 :=
     begin
       intros u w,
-      ring_nf,
-      sorry,
-    end,
-  have : ∀ u w : ℂ^n, 4 • ⟪T u, w ⟫_ℂ = 0 :=
-    begin
-      intros u w,
-      calc 4 • ⟪T u, w ⟫_ℂ = ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : calculation u w
-      ...                  = - ⟪T (u - w) , u - w⟫_ℂ + complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : by {rw h (u + w), ring}
-      ...                  = complex.I • ⟪T (u + complex.I • w) , u + complex.I • w⟫_ℂ - complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ : by {rw h (u - w), ring}
-      ...                  = - (complex.I • ⟪T (u - complex.I • w), u - complex.I • w ⟫_ℂ) : by {rw h (u + complex.I • w), rw smul_zero, ring}
-      ...                  = 0 : by {rw h (u - complex.I • w), rw smul_zero, ring},
+      rw lem_7_14_b,
+      iterate {rw h},
+      ring,
     end,
   apply linear_map.ext,
   intro x,
@@ -112,9 +96,9 @@ begin
     apply inner_with_all_eq_zero_eq_zero,
     intro u,
     calc ⟪u, (T x)⟫_ℂ = conj ⟪(T x), u⟫_ℂ : by {rw ← inner_conj_sym}
-    ...                = (1 / 4) • (4 • conj ⟪(T x), u⟫_ℂ ) : by {sorry}
-    ...                = (1 / 4) • conj (4 • ⟪(T x), u⟫_ℂ ) : by {sorry}
-    ...                = (1 / 4) • conj 0 : by {rw this u}
+    ...                = (1 / 4) * (4 * conj ⟪(T x), u⟫_ℂ ) : by {ring}
+    ...                = (1 / 4) * conj (4 * ⟪(T x), u⟫_ℂ ) : by {simp}
+    ...                = (1 / 4) * conj 0 : by {rw this u}
     ...                = 0 : by {simp},
   end,
   rw this,
@@ -223,8 +207,8 @@ end
 lemma lem_7_20_2_b(T : Lℂ^n): (T * T†) - (T† * T) = ((T * T† ) - (T† * T))† :=
 begin
   simp,
-  rw adjoint_prod,
-  rw adjoint_prod,
+  rw mul_adjoint,
+  rw mul_adjoint,
   rw linear_map.adjoint_adjoint,
 end
 
