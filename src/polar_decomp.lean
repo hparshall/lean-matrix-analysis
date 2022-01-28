@@ -11,6 +11,12 @@ variable T : Lℂ^n
 def is_isometry (S: Lℂ^n) : Prop := ∀ (v : ℂ^n), ∥ S v ∥ = ∥ v ∥
 
 
+lemma inj_eq_surj_finite_dim (h : T.ker = ⊥) : T.range ≃ₗ[ℂ] ℂ^n :=
+begin
+  sorry,
+end
+
+
 lemma adjoint_prod_sa : is_sa (T† * T) :=
 begin
   intros x y,
@@ -137,6 +143,19 @@ begin
   -- rw ← linear_equiv.inv_fun_eq_symm,
   -- linear_equiv.of_injective T (linear_map.ker_eq_bot.1 inj_T),
   -- let sqr_inv_T : Lℂ^n := T * ((sqrt' T)⁻¹),
+end
+
+lemma lem_7_45'' (h : T.ker = ⊥) : ∃ (S : Lℂ^n), T = S * (sqrt' T) :=
+begin
+  rw ker_eq_sqrt_ker at h,
+  rw linear_map.ker_eq_bot at h,
+  let sqrt_T_equiv' : (ℂ^n) ≃ₗ[ℂ] (sqrt' T).range := linear_equiv.of_injective (sqrt' T) h,
+
+  rw ← linear_map.ker_eq_bot at h,
+  let sqrt_T_equiv : (ℂ^n) ≃ₗ[ℂ] (ℂ^n) := linear_equiv.trans sqrt_T_equiv' (inj_eq_surj_finite_dim (sqrt' T) h),
+
+  use (T * sqrt_T_equiv.symm),
+  sorry,
 end
 
 
