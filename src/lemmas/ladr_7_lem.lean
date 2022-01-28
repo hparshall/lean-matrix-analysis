@@ -46,3 +46,18 @@ end
 lemma mul_adjoint (A B : Lℂ^n) : (A * B)† = B† * A† := adjoint_prod n A B
 
 lemma sub_adjoint (A B : Lℂ^n) : (A - B)† = A† - B† := by {simp}
+
+lemma norm_sq_eq_zero (v : ℂ^n) : ∥ v ∥^2 = 0 ↔ v = 0 :=
+begin
+  split,
+  rw ← real.sqrt_eq_zero,
+  rw real.sqrt_sq,
+  rw norm_eq_zero,
+  intro h,
+  exact h,
+  exact norm_nonneg v,
+  exact sq_nonneg (∥ v ∥),
+  intro h,
+  rw h,
+  simp,
+end
