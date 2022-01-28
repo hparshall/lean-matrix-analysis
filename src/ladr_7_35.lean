@@ -99,7 +99,7 @@ section sec_7_35_b_c
 
 variable (i : fin n)
 
-variable (hnn : ((e_vals T hsa) i) ≥ 0)
+variable (hnn : 0 ≤ ((e_vals T hsa) i))
 
 lemma lem_bc_0 :
   (sqrt T hsa) ((e_vecs T hsa) i) = real.sqrt ((e_vals T hsa) i) • ((e_vecs T hsa) i) :=
@@ -109,7 +109,14 @@ begin
   rw scaled_e_vecs,
 end
 
-lemma lem_bc_1 :
+lemma sqrt_sqrt (hnn : 0 ≤ ((e_vals T hsa) i)):
+  real.sqrt ((e_vals T hsa) i) * real.sqrt ((e_vals T hsa) i) = (e_vals T hsa) i :=
+begin
+  rw real.mul_self_sqrt,
+  exact hnn,
+end
+
+lemma lem_bc_1 (hnn : 0 ≤ ((e_vals T hsa) i)):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
 begin
   apply basis.ext (e_vecs T hsa),
@@ -120,6 +127,9 @@ begin
   rw h,
   simp,
   rw lem_bc_0,
+  rw linear_map.map_smul_of_tower, -- why _of_tower?
+  rw lem_bc_0,
+  rw smul_smul,
   sorry,
 end
 
