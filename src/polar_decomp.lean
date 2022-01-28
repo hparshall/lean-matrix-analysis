@@ -4,6 +4,7 @@ import .lemmas.ladr_7_lem
 import linear_algebra.basic
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
+-- notation `is_sa` := inner_product_space.is_self_adjoint
 variable {n : ℕ}
 variable T : Lℂ^n
 
@@ -20,17 +21,69 @@ end
 
 noncomputable def sqrt' : Lℂ^n := sqrt (T† * T) (adjoint_prod_sa T)
 
+
+lemma sa_means_dag_eq_no_dag : (is_sa T) → T† = T :=
+begin
+  intro h,
+  ext1,
+  have : T† x - T x = 0 :=
+  begin
+    apply inner_with_all_eq_zero_eq_zero,
+    intro u,
+
+    calc ⟪ u , (T† x) - (T x) ⟫_ℂ = ⟪ u, T† x ⟫_ℂ - ⟪ u , T x ⟫_ℂ : by {rw inner_sub_right}
+    ...                      = ⟪ T u, x ⟫_ℂ - ⟪ u , T x ⟫_ℂ : by {rw linear_map.adjoint_inner_right}
+    ...                      = ⟪ u, T x ⟫_ℂ - ⟪ u, T x ⟫_ℂ : by {rw (h u x)}
+    ...                      = 0 : by {ring},
+  end,
+  rw sub_eq_zero at this,
+  exact this,
+end
+
+lemma sqrt'_sq : ((sqrt' T) * (sqrt' T)) = T† * T :=
+begin
+  rw sqrt',
+  rw lem_bc_1,
+end
+
 --- This is a statement about the norm-squared. Later in the proof, they use just the norm,
 --- I'm hoping we can stick to norm-squared, though, since it's easier to work with Lean-wise
-lemma eq_7_46: ∀ (v : ℂ^n), ∥ T v ∥^2 = ∥ sqrt' T v ∥^2 :=
+--- Yes, we can work with norm-squared, but that is using the lemma norm_sq_eq_zero from ladr_7_lem
+-- This is the actual proof the statement, but we use it in the form eq_7_46, since it's really a statement
+-- about real numbers.
+lemma eq_7_46': ∀ (v : ℂ^n), (∥ T v ∥^2 : ℂ) = (∥ sqrt' T v ∥^2 : ℂ) :=
 begin
-  sorry,
+  intro v,
+  calc (∥ T v ∥^2 : ℂ) = ⟪ T v , T v ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
+    ...          = ⟪ T† (T v), v ⟫_ℂ : by {rw linear_map.adjoint_inner_left}
+    ...          = ⟪ (T† * T) v, v ⟫_ℂ : by {rw comp_eq_mul}
+    ...          = ⟪ ((sqrt' T) * (sqrt' T)) v, v ⟫_ℂ : by {rw sqrt'_sq}
+    ...          = ⟪ sqrt' T v, sqrt' T v ⟫_ℂ : by {rw ← comp_eq_mul, rw ← linear_map.adjoint_inner_left, rw (sa_means_dag_eq_no_dag (sqrt' T) (lem_bc_2 (T† * T) (adjoint_prod_sa T))),}
+    ...          = (∥ (sqrt' T) v ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K},
+end
+
+lemma eq_7_46: ∀ (v : ℂ^n), (∥ T v ∥^2 : ℝ) = (∥ sqrt' T v ∥^2 : ℝ) :=
+begin
+  intro v,
+  apply complex.of_real_injective,
+  simp,
+  exact eq_7_46' T v,
 end
 
 --- The key step for S₁ being well-defined:
 lemma lem_7_45_a : ∀ u v : ℂ^n, sqrt' T u = sqrt' T v → T u = T v :=
 begin
-  sorry,
+  intros u v h,
+  have : ∥ T u - T v ∥^2 = 0 :=
+  begin
+    calc ∥ T u - T v ∥^2 = ∥ T (u - v) ∥^2 : by {rw map_sub T u v}
+    ...                  = ∥ sqrt' T (u - v) ∥^2 : by {rw eq_7_46}
+    ...                  = ∥ (sqrt' T u) - (sqrt' T v) ∥^2 : by {rw map_sub}
+    ...                  = 0 : by {rw [h, sub_self], simp},
+  end,
+  rw norm_sq_eq_zero at this,
+  rw ← sub_eq_zero,
+  exact this,
 end
 
 #check linear_map.range T
@@ -80,6 +133,7 @@ begin
   split,
   ext1,
   simp,
+  sorry,
   -- rw ← linear_equiv.inv_fun_eq_symm,
   -- linear_equiv.of_injective T (linear_map.ker_eq_bot.1 inj_T),
   -- let sqr_inv_T : Lℂ^n := T * ((sqrt' T)⁻¹),
