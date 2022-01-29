@@ -7,21 +7,10 @@ open_locale big_operators complex_conjugate matrix
 lemma gram_sa :
   is_sa (T.adjoint * T) :=
 begin
-  rw self_adjoint_iff,
-  rw linear_map.eq_adjoint_iff,
   intros x y,
-  have fact₁ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪T x, T y⟫_ℂ :=
-  begin
-    rw ← comp_eq_mul,
-    rw linear_map.adjoint_inner_left,
-  end,
-  have fact₂ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪x, (T.adjoint * T) y⟫_ℂ :=
-  begin
-    rw fact₁,
-    rw ← linear_map.adjoint_inner_right,
-    rw comp_eq_mul,
-  end,
-  exact fact₂,
+  rw ← linear_map.adjoint_inner_right,
+  rw mul_adjoint,
+  rw linear_map.adjoint_adjoint,
 end
 
 lemma gram_pos :
