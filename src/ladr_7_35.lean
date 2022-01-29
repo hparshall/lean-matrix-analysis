@@ -99,8 +99,6 @@ section sec_7_35_b_c
 
 variable (i : fin n)
 
-variable (hnn : 0 ≤ ((e_vals T hsa) i))
-
 lemma lem_bc_0 :
   (sqrt T hsa) ((e_vecs T hsa) i) = real.sqrt ((e_vals T hsa) i) • ((e_vecs T hsa) i) :=
 begin
@@ -116,7 +114,7 @@ begin
   exact hnn,
 end
 
-lemma lem_bc_1 (hnn : 0 ≤ ((e_vals T hsa) i)):
+lemma lem_bc_1 (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
 begin
   apply basis.ext (e_vecs T hsa),
@@ -127,10 +125,12 @@ begin
   rw h,
   simp,
   rw lem_bc_0,
-  rw linear_map.map_smul_of_tower, -- why _of_tower?
+  rw linear_map.map_smul_of_tower,
   rw lem_bc_0,
   rw smul_smul,
-  sorry,
+  rw sqrt_sqrt,
+  specialize hnn i,
+  exact hnn,
 end
 
 lemma lem_bc_2 :
@@ -138,10 +138,15 @@ lemma lem_bc_2 :
 begin
   rw self_adjoint_iff,
   rw linear_map.eq_adjoint_iff_basis (e_vecs T hsa) (e_vecs T hsa),
-  intros i₁ i₂,
+  intros i j,
+  let μi := (e_vals T hsa) i,
+  let vi := (e_vecs T hsa) i,
+  let μj := (e_vals T hsa) j,
+  let vj := (e_vecs T hsa) j,
   rw lem_bc_0,
   rw lem_bc_0,
-  sorry,
+  -- why doesn't this work?
+  -- rw @inner_smul_left ℂ (ℂ^n) _ _ (e_vecs T hsa i) (e_vecs T hsa j) (real.sqrt μi),
 end
 
 lemma lem_bc_3 :
