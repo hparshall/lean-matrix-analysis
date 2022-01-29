@@ -68,6 +68,8 @@ begin
     ...          = (∥ (sqrt' T) v ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K},
 end
 
+-- #check sqrt (T† * T) 
+
 lemma eq_7_46: ∀ (v : ℂ^n), (∥ T v ∥^2 : ℝ) = (∥ sqrt' T v ∥^2 : ℝ) :=
 begin
   intro v,
@@ -155,12 +157,42 @@ begin
   let sqrt_T_equiv : (ℂ^n) ≃ₗ[ℂ] (ℂ^n) := linear_equiv.trans sqrt_T_equiv' (inj_eq_surj_finite_dim (sqrt' T) h),
 
   use (T * sqrt_T_equiv.symm),
+
+  sorry,
+end
+
+noncomputable def S₁ : T.range ≃ₗ[ℂ] (sqrt' T).range :=
+begin
+  have T_first :((ℂ^n) ⧸  T.ker) ≃ₗ[ℂ] T.range :=
+  begin
+    exact linear_map.quot_ker_equiv_range T,
+  end,
+  have Q_first :((ℂ^n) ⧸  (sqrt' T).ker) ≃ₗ[ℂ] (sqrt' T).range :=
+  begin
+    exact linear_map.quot_ker_equiv_range (sqrt' T),
+  end,
+  rw ker_eq_sqrt_ker at T_first,
+  exact (T_first.symm).trans (Q_first),
+end
+
+#check (S₁ T).to_linear_map
+
+def S₂ : T.range → (sqrt' T).range :=
+begin
+  intro x,
+  let y : (ℂ^n) ⧸  T.ker := ((linear_map.quot_ker_equiv_range T).symm).to_linear_map x,
+  let z : (ℂ^n) ⧸ (sqrt' T).ker := y,
+end
+
+-- This is maybe the statement to prove?
+example : ∀ v : ℂ^n, (S₁ T).to_linear_map (linear_map.range_restrict T v) = (linear_map.range_restrict (sqrt' T)) v :=
+begin
+
   sorry,
 end
 
 
-
-lemma lem_7_45 : ∃ (S : Lℂ^n), (T = sqrt (T† * T) (adjoint_prod_sa T)) ∧ (is_isometry S) :=
+lemma lem_7_45 : ∃ (S : Lℂ^n), (T = S * sqrt (T† * T) (adjoint_prod_sa T)) ∧ (is_isometry S) :=
 begin
   sorry,
 end
