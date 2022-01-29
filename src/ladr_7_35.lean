@@ -7,15 +7,13 @@ import linear_algebra.basis
 import .lemmas.ladr_7_lem
 import .ladr_7
 
-variables {n : ℕ}
-
 open_locale big_operators complex_conjugate matrix
 
 notation `is_sa` := inner_product_space.is_self_adjoint
 
-lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := by simp
+variables {n : ℕ} (T : Lℂ^n) (hsa : is_sa T) (i : fin n)
 
-variables (T : Lℂ^n) (hsa : is_sa T)
+lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := by exact finrank_euclidean_space_fin
 
 noncomputable def e_vals : (fin n → ℝ) :=
   inner_product_space.is_self_adjoint.eigenvalues hsa hn
@@ -26,33 +24,15 @@ noncomputable def e_vecs : (basis (fin n) ℂ (ℂ^n)) :=
 noncomputable def scaled_e_vecs : (fin n) → ℂ^n :=
   λ (i : (fin n)), (real.sqrt(((e_vals T hsa) i)) : ℂ) • ((e_vecs T hsa) i)
 
-noncomputable def sqrt (T : Lℂ^n) (hsa : is_sa T) : Lℂ^n :=
+noncomputable def sqrt : Lℂ^n :=
   @basis.constr (fin n) ℂ (ℂ^n) (ℂ^n) _ _ _ _ _ (e_vecs T hsa) ℂ _ _ _ (scaled_e_vecs T hsa)
 
-def is_positive (T : Lℂ^n) :=
+def is_positive :=
   (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
 
-lemma lem_gram_self_adjoint :
-  is_sa (T.adjoint * T) :=
-begin
-  rw self_adjoint_iff,
-  rw linear_map.eq_adjoint_iff,
-  intros x y,
-  have fact₁ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪T x, T y⟫_ℂ :=
-  begin
-    rw ← comp_eq_mul,
-    rw linear_map.adjoint_inner_left,
-  end,
-  have fact₂ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪x, (T.adjoint * T) y⟫_ℂ :=
-  begin
-    rw fact₁,
-    rw ← linear_map.adjoint_inner_right,
-    rw comp_eq_mul,
-  end,
-  exact fact₂,
-end
+variable (hpos : is_positive T)
 
-theorem thm_7_35_a_b :
+theorem thm_7_35_a_b (hsa : is_sa T):
   is_positive T → (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
 begin
   intro hpos,
@@ -90,10 +70,6 @@ begin
   exact hre,
 end
 
-section sec_7_35_b_c
-
-variable (i : fin n)
-
 lemma lem_bc_0 :
   (sqrt T hsa) ((e_vecs T hsa) i) = (real.sqrt ((e_vals T hsa) i) : ℂ) • ((e_vecs T hsa) i) :=
 begin
@@ -130,7 +106,7 @@ begin
   exact hnn,
 end
 
-lemma lem_bc_2 (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :
+lemma lem_bc_2 (hpos : is_positive T) :
   is_sa (sqrt T hsa) :=
 begin
   rw self_adjoint_iff,
@@ -169,31 +145,116 @@ begin
   rw hj,
 end
 
-lemma lem_bc_3a (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) (x : ℂ^n) :
-  ⟪ (sqrt T hsa) x, x ⟫_ℂ.re ≥ 0 :=
+lemma evecs_on (i j : fin n) : ⟪ (e_vecs T hsa) i, (e_vecs T hsa) j ⟫_ℂ = ite (i = j) 1 0 :=
 begin
-  -- proof on paper:  expand x w.r.t. the o.n. basis of eigenvectors
-  -- how to complete here?
-  sorry,
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  rw orthonormal_iff_ite at hon,
+  specialize hon i j,
+  exact hon,
 end
 
-lemma lem_bc_3 (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :
+lemma inner_evec_coords (x : ℂ^n) (i : fin n) :
+  ⟪ ((e_vecs T hsa) i), x ⟫_ℂ = (e_vecs T hsa).repr x i :=
+begin
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  rw orthonormal_iff_ite at hon,
+  conv
+  begin
+    to_lhs,
+    rw ← basis.sum_repr (e_vecs T hsa) x,
+    rw inner_sum,
+    congr,
+    skip,
+    funext,
+    rw inner_smul_right,
+    dedup,
+    rw evecs_on,
+    simp,
+  end,
+  rw finset.sum_ite,
+  simp,
+  rw finset.filter_eq,
+  simp,
+end
+
+lemma sqrt_repr (x : ℂ^n) (i : fin n) (hpos : is_positive T):
+  (e_vecs T hsa).repr ((sqrt T hsa) x) i = (real.sqrt(e_vals T hsa i)) • ((e_vecs T hsa).repr x i) :=
+begin
+  rw ← inner_evec_coords,
+  rw ← inner_evec_coords,
+  have hsqrt : is_sa (sqrt T hsa) :=
+  begin
+    apply lem_bc_2,
+    exact hpos,
+  end,
+  rw self_adjoint_iff at hsqrt,
+  rw linear_map.eq_adjoint_iff at hsqrt,
+  specialize hsqrt ((e_vecs T hsa) i) x,
+  rw ← hsqrt,
+  rw lem_bc_0,
+  rw inner_smul_left,
+  simp,
+end
+
+lemma lem_bc_3a (hpos : is_positive T) (x : ℂ^n) :
+  ⟪ (sqrt T hsa) x, x ⟫_ℂ.re ≥ 0 :=
+begin
+  rw ← basis.sum_repr (e_vecs T hsa) ((sqrt T hsa) x),
+  rw sum_inner,
+  conv
+  begin
+    to_lhs,
+    congr,
+    congr,
+    skip,
+    funext,
+    rw sqrt_repr T hsa x i hpos,
+    rw inner_smul_left,
+    rw inner_evec_coords,
+    rw is_R_or_C.conj_smul,
+    rw smul_mul_assoc,
+    rw ← complex.norm_sq_eq_conj_mul_self,
+  end,
+  norm_cast,
+  apply finset.sum_nonneg',
+  intro i,
+  have hnn : (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
+  begin
+    apply thm_7_35_a_b,
+    exact hpos,
+  end,
+  specialize hnn i,
+  by_cases hz : (e_vals T hsa) i = 0,
+  rw hz,
+  simp,
+  rw ne.le_iff_lt at hnn,
+  rw ← real.sqrt_pos at hnn,
+  rw ← div_le_iff',
+  simp,
+  apply complex.norm_sq_nonneg,
+  exact hnn,
+  symmetry,
+  norm_cast,
+  exact hz,
+end
+
+lemma lem_bc_3 (hpos : is_positive T) :
   is_positive (sqrt T hsa) :=
 begin
   let R := (sqrt T hsa),
-  have hsaR : (is_sa R) := by exact lem_bc_2 T hsa hnn,
+  have hsaR : (is_sa R) := by exact lem_bc_2 T hsa hpos,
   rw is_positive,
   intro x,
   rw lem_7_15 at hsaR,
   split,
   apply lem_bc_3a,
-  exact hnn,
+  exact hpos,
   specialize hsaR x,
   rw ← complex.eq_conj_iff_im,
   exact hsaR,
 end
 
-theorem thm_7_35_b_c (hsa : is_sa T) (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)):
+theorem thm_7_35_b_c (hpos : is_positive T) (hsa : is_sa T) (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)):
   ∃ (R : Lℂ^n), ((R * R) = T) ∧ (is_sa R) ∧ (is_positive R) :=
 begin
   use (sqrt T hsa),
@@ -202,33 +263,7 @@ begin
   exact hnn,
   split,
   apply lem_bc_2,
-  exact hnn,
+  exact hpos,
   apply lem_bc_3,
-  exact hnn,
-end
-
-end sec_7_35_b_c
-
-lemma lem_sqrt_gram :
-  ∃ (R : Lℂ^n), (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) :=
-begin
-  have hg : is_sa (T.adjoint * T) := by exact lem_gram_self_adjoint T,
-  apply thm_7_35_b_c,
-  apply thm_7_35_a_b,
-  rw is_positive,
-  intro x,
-  have h1 : ⟪ (T.adjoint * T) x, x ⟫_ℂ = ⟪ (linear_map.adjoint T) (T x), x ⟫_ℂ :=
-  begin
-    rw linear_map.mul_apply,
-  end,
-  rw h1,
-  rw linear_map.adjoint_inner_left,
-  rw ← is_R_or_C.re_to_complex,
-  rw ← is_R_or_C.im_to_complex,
-  rw inner_self_eq_norm_sq,
-  norm_cast,
-  split,
-  exact sq_nonneg (∥ T x ∥),
-  rw inner_self_nonneg_im,
-  exact hg,
+  exact hpos,
 end
