@@ -1,9 +1,7 @@
-import analysis.inner_product_space.adjoint
-import analysis.inner_product_space.basic
-import analysis.inner_product_space.pi_L2
-import analysis.inner_product_space.spectrum
-import analysis.normed_space.pi_Lp
-import linear_algebra.basis
+/-
+The goal of this file is to prove that every positive, self-adjoint linear operator
+on ℂ^n has a positive, self-adjoint square root.
+-/
 import .lemmas.ladr_7_lem
 import .ladr_7
 
@@ -11,7 +9,20 @@ open_locale big_operators complex_conjugate matrix
 
 notation `is_sa` := inner_product_space.is_self_adjoint
 
-variables {n : ℕ} (T : Lℂ^n) (hsa : is_sa T) (i : fin n)
+/-
+Throughout, T is a positive, self-adjoint linear operator on ℂ^n.
+-/
+
+variables {n : ℕ} (T : Lℂ^n) (hsa : is_sa T)
+
+def is_positive :=
+  (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
+
+variable (hpos : is_positive T)
+
+/-
+The spectral theorem allows us to define √T
+-/
 
 lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := by exact finrank_euclidean_space_fin
 
@@ -27,15 +38,13 @@ noncomputable def scaled_e_vecs : (fin n) → ℂ^n :=
 noncomputable def sqrt : Lℂ^n :=
   @basis.constr (fin n) ℂ (ℂ^n) (ℂ^n) _ _ _ _ _ (e_vecs T hsa) ℂ _ _ _ (scaled_e_vecs T hsa)
 
-def is_positive :=
-  (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
+/-
+T is positive, and so its eigenvalues are nonnegative.
+-/
 
-variable (hpos : is_positive T)
-
-theorem thm_7_35_a_b (hsa : is_sa T):
-  is_positive T → (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
+theorem thm_7_35_a_b (hpos : is_positive T):
+  (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
 begin
-  intro hpos,
   intro i,
   let μ := (e_vals T hsa) i,
   let v := (e_vecs T hsa) i,
@@ -70,7 +79,11 @@ begin
   exact hre,
 end
 
-lemma lem_bc_0 :
+/-
+By definition, √T has the same eigenvectors as T, with sqrt eigenvalues.
+-/
+
+lemma lem_bc_0 (i : fin n):
   (sqrt T hsa) ((e_vecs T hsa) i) = (real.sqrt ((e_vals T hsa) i) : ℂ) • ((e_vecs T hsa) i) :=
 begin
   rw sqrt,
@@ -78,15 +91,7 @@ begin
   rw scaled_e_vecs,
 end
 
-lemma sqrt_sqrt (hnn : 0 ≤ ((e_vals T hsa) i)):
-  (real.sqrt ((e_vals T hsa) i) : ℂ) * (real.sqrt ((e_vals T hsa) i) : ℂ) = (e_vals T hsa) i :=
-begin
-  norm_cast,
-  rw real.mul_self_sqrt,
-  exact hnn,
-end
-
-lemma lem_bc_1 (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)):
+lemma lem_bc_1 (hpos : is_positive T):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
 begin
   apply basis.ext (e_vecs T hsa),
@@ -100,10 +105,15 @@ begin
   rw linear_map.map_smul,
   rw lem_bc_0,
   rw smul_smul,
-  rw sqrt_sqrt,
   norm_cast,
-  specialize hnn i,
-  exact hnn,
+  rw real.mul_self_sqrt,
+  have hab : (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
+  begin
+    apply thm_7_35_a_b,
+    exact hpos
+  end,
+  specialize hab i,
+  exact hab,
 end
 
 lemma lem_bc_2 (hpos : is_positive T) :
@@ -254,13 +264,17 @@ begin
   exact hsaR,
 end
 
-theorem thm_7_35_b_c (hpos : is_positive T) (hsa : is_sa T) (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)):
+
+/-
+A positive, self-adjoint linear operator T : ℂ^n → ℂ^n has a positive, self-adjoint square root.
+-/
+theorem thm_7_35_b_c (hsa : is_sa T) (hpos : is_positive T):
   ∃ (R : Lℂ^n), ((R * R) = T) ∧ (is_sa R) ∧ (is_positive R) :=
 begin
   use (sqrt T hsa),
   split,
   apply lem_bc_1,
-  exact hnn,
+  exact hpos,
   split,
   apply lem_bc_2,
   exact hpos,
