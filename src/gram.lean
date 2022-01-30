@@ -38,8 +38,6 @@ lemma sqrt_gram :
 begin
   have hg : is_sa (T.adjoint * T) := by exact gram_sa T,
   apply thm_7_35_b_c,
-  apply gram_pos,
-  apply thm_7_35_a_b,
-  apply gram_pos,
   exact hg,
+  apply gram_pos,
 end
