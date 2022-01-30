@@ -18,12 +18,6 @@ begin
    rw inner_product_space.is_self_adjoint,
 end
 
-lemma lem_7_10 (T : Lℂ^n) :
-  (linear_map.to_matrix' T.adjoint) = (linear_map.to_matrix' T)ᴴ :=
-begin
-  sorry,
-end
-
 lemma lem_7_13 (T : Lℂ^n)
   (hT : inner_product_space.is_self_adjoint T):
   ∀ (μ : ℂ) (h : T.has_eigenvalue μ), conj μ = μ :=
@@ -52,7 +46,7 @@ end
 lemma lem_7_14_a (T : Lℂ^n) (u w : ℂ^n): ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I * ⟪T (u + I • w) , u + I • w⟫_ℂ - I * ⟪T (u - I • w), u - I • w ⟫_ℂ = 4 * ⟪ T w, u ⟫_ℂ :=
 begin
   calc ⟪T (u + w) , u + w⟫_ℂ - ⟪T (u - w) , u - w⟫_ℂ + I * ⟪T (u + I • w) , u + I • w⟫_ℂ - I * ⟪T (u - I • w), u - I • w ⟫_ℂ
-      = ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ - ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ - ⟪T w, w⟫_ℂ + I * ⟪T u, u⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ - I * ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ - ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ : by 
+      = ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ + ⟪T w, w⟫_ℂ - ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ + ⟪T u, w⟫_ℂ - ⟪T w, w⟫_ℂ + I * ⟪T u, u⟫_ℂ - ⟪T u, w⟫_ℂ + ⟪T w, u⟫_ℂ - I * ⟪T w, w⟫_ℂ - I * ⟪T u, u⟫_ℂ + ⟪T w, u⟫_ℂ - ⟪T u, w⟫_ℂ + I * ⟪T w, w⟫_ℂ : by
       {
         rw [inner_map_add_add, inner_map_add_add],
         rw [inner_map_sub_sub, inner_map_sub_sub],
@@ -184,7 +178,7 @@ begin
 end
 
 lemma lem_7_20_1_b (T : Lℂ^n) (hT : is_normal T) (v : ℂ^n) : (∥ T v ∥^2 : ℂ ) = (∥ T† v ∥^2 : ℂ) :=
-begin 
+begin
   calc (∥ T v ∥^2 : ℂ) = ⟪ T v , T v ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
   ...            =  ⟪ (T†) (T v), v ⟫_ℂ : by {rw linear_map.adjoint_inner_left T}
   ...            =  ⟪ ((T†) * T) v, v ⟫_ℂ : by {rw comp_eq_mul}
@@ -244,18 +238,18 @@ begin
   rw inner_self_eq_norm_sq_to_K,
 end
 
-lemma lem_7_21 (T : Lℂ^n)
-  (μ : ℂ) (v : ℂ^n)
-  (hT : is_normal T) (hv : T.has_eigenvector μ v) :
-  module.End.has_eigenvector (T.adjoint) (conj μ) v :=
-begin
-  sorry,
-end
+-- lemma lem_7_21 (T : Lℂ^n)
+--   (μ : ℂ) (v : ℂ^n)
+--   (hT : is_normal T) (hv : T.has_eigenvector μ v) :
+--   module.End.has_eigenvector (T.adjoint) (conj μ) v :=
+-- begin
+--   sorry,
+-- end
 
-lemma lem_7_22 (T : Lℂ^n)
-  (μ₁ μ₂ : ℂ) (v₁ v₂ : ℂ^n)
-  (hT : is_normal T) (hμ₁ : T.has_eigenvector μ₁ v₁) (hμ₂ : T.has_eigenvector μ₂ v₂)
-  (hneq : μ₁ ≠ μ₂) : ⟪v₁,v₂⟫_ℂ = 0 :=
-begin
-  sorry,
-end
+-- lemma lem_7_22 (T : Lℂ^n)
+--   (μ₁ μ₂ : ℂ) (v₁ v₂ : ℂ^n)
+--   (hT : is_normal T) (hμ₁ : T.has_eigenvector μ₁ v₁) (hμ₂ : T.has_eigenvector μ₂ v₂)
+--   (hneq : μ₁ ≠ μ₂) : ⟪v₁,v₂⟫_ℂ = 0 :=
+-- begin
+--   sorry,
+-- end

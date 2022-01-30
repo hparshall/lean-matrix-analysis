@@ -1,21 +1,30 @@
-import analysis.inner_product_space.adjoint
-import analysis.inner_product_space.basic
-import analysis.inner_product_space.pi_L2
-import analysis.inner_product_space.spectrum
-import analysis.normed_space.pi_Lp
-import linear_algebra.basis
+/-
+The goal of this file is to prove that every positive, self-adjoint linear operator
+on ℂ^n has a positive, self-adjoint square root.
+-/
 import .lemmas.ladr_7_lem
 import .ladr_7
-
-variables {n : ℕ}
 
 open_locale big_operators complex_conjugate matrix
 
 notation `is_sa` := inner_product_space.is_self_adjoint
 
-lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := by simp
+/-
+Throughout, T is a positive, self-adjoint linear operator on ℂ^n.
+-/
 
-variables (T : Lℂ^n) (hsa : is_sa T)
+variables {n : ℕ} (T : Lℂ^n) (hsa : is_sa T)
+
+def is_positive :=
+  (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
+
+variable (hpos : is_positive T)
+
+/-
+The spectral theorem allows us to define √T
+-/
+
+lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := by exact finrank_euclidean_space_fin
 
 noncomputable def e_vals : (fin n → ℝ) :=
   inner_product_space.is_self_adjoint.eigenvalues hsa hn
@@ -24,97 +33,65 @@ noncomputable def e_vecs : (basis (fin n) ℂ (ℂ^n)) :=
   @inner_product_space.is_self_adjoint.eigenvector_basis ℂ _ _ (ℂ^n) _ T hsa _ n hn
 
 noncomputable def scaled_e_vecs : (fin n) → ℂ^n :=
-  λ (i : (fin n)), real.sqrt(((e_vals T hsa) i)) • ((e_vecs T hsa) i)
+  λ (i : (fin n)), (real.sqrt(((e_vals T hsa) i)) : ℂ) • ((e_vecs T hsa) i)
 
-noncomputable def sqrt (T : Lℂ^n) (hsa : is_sa T) : Lℂ^n :=
+noncomputable def sqrt : Lℂ^n :=
   @basis.constr (fin n) ℂ (ℂ^n) (ℂ^n) _ _ _ _ _ (e_vecs T hsa) ℂ _ _ _ (scaled_e_vecs T hsa)
 
-def is_positive (T : Lℂ^n) :=
-  (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
+/-
+T is positive, and so its eigenvalues are nonnegative.
+-/
 
-lemma lem_gram_self_adjoint :
-  is_sa (T.adjoint * T) :=
+theorem thm_7_35_a_b (hpos : is_positive T):
+  (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
 begin
-  rw self_adjoint_iff,
-  rw linear_map.eq_adjoint_iff,
-  intros x y,
-  have fact₁ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪T x, T y⟫_ℂ :=
+  intro i,
+  let μ := (e_vals T hsa) i,
+  let v := (e_vecs T hsa) i,
+  have hv : T.has_eigenvector μ v := by apply inner_product_space.is_self_adjoint.has_eigenvector_eigenvector_basis,
+  have hμ : T v = (μ : ℂ) • v := by apply module.End.has_eigenvector.apply_eq_smul hv,
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  have hn : ⟪v, v⟫_ℂ = 1 :=
   begin
-    rw ← comp_eq_mul,
-    rw linear_map.adjoint_inner_left,
+    rw orthonormal_iff_ite at hon,
+    specialize hon i i,
+    have hite : ite (i = i) (1 : ℂ) (0 : ℂ) = (1 : ℂ) :=
+    begin
+      rw ne.ite_eq_left_iff,
+      simp,
+    end,
+    rw hite at hon,
+    exact hon,
   end,
-  have fact₂ : ⟪((T.adjoint * T) x), y⟫_ℂ = ⟪x, (T.adjoint * T) y⟫_ℂ :=
+  have hip : ⟪T v, v⟫_ℂ = (conj μ) :=
   begin
-    rw fact₁,
-    rw ← linear_map.adjoint_inner_right,
-    rw comp_eq_mul,
-  end,
-  exact fact₂,
-end
-
-theorem thm_7_35_a_b :
-  is_positive T → (∀ (μ : ℂ), (T.has_eigenvalue μ) → (μ.re ≥ 0 ∧ μ.im = 0)) :=
-begin
-  intro hpos,
-  intros μ hμ,
-  have ev : ∃(v : ℂ^n), T.has_eigenvector μ v :=
-    by exact module.End.has_eigenvalue.exists_has_eigenvector hμ,
-  cases ev with v hv,
-  have eq : (⟪T v, v⟫_ℂ) = (conj μ) * ∥ v ∥^2 :=
-  begin
-    rw module.End.has_eigenvector.apply_eq_smul hv,
+    rw hμ,
     rw inner_smul_left,
-    rw inner_self_eq_norm_sq_to_K,
+    rw hn,
+    simp,
   end,
-  rw complex.ext_iff at eq,
-  cases eq with hre him,
   rw is_positive at hpos,
   specialize hpos v,
-  cases hpos with hnn himz,
-  rw himz at him,
-  rw complex.mul_im at him,
-  norm_cast at him,
-  simp at him,
-  rw module.End.has_eigenvector at hv,
-  have muim : μ.im = 0 := by tauto,
-  split,
-  rw hre at hnn,
-  norm_cast at hnn,
-  rw complex.mul_re at hnn,
-  norm_cast at hnn,
-  simp at hnn,
-  rw ← div_le_iff at hnn,
-  simp at hnn,
-  norm_cast,
-  exact hnn,
-  cases hv with eig nz,
-  rw ← real.sqrt_ne_zero',
-  simp,
-  simp at nz,
-  exact nz,
-  exact muim,
+  cases hpos with hre him,
+  rw hip at hre,
+  norm_cast at hre,
+  simp at hre,
+  exact hre,
 end
 
-section sec_7_35_b_c
+/-
+By definition, √T has the same eigenvectors as T, with sqrt eigenvalues.
+-/
 
-variable (i : fin n)
-
-lemma lem_bc_0 :
-  (sqrt T hsa) ((e_vecs T hsa) i) = real.sqrt ((e_vals T hsa) i) • ((e_vecs T hsa) i) :=
+lemma lem_bc_0 (i : fin n):
+  (sqrt T hsa) ((e_vecs T hsa) i) = (real.sqrt ((e_vals T hsa) i) : ℂ) • ((e_vecs T hsa) i) :=
 begin
   rw sqrt,
   rw basis.constr_basis,
   rw scaled_e_vecs,
 end
 
-lemma sqrt_sqrt (hnn : 0 ≤ ((e_vals T hsa) i)):
-  real.sqrt ((e_vals T hsa) i) * real.sqrt ((e_vals T hsa) i) = (e_vals T hsa) i :=
-begin
-  rw real.mul_self_sqrt,
-  exact hnn,
-end
-
-lemma lem_bc_1 (hnn : ∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)):
+lemma lem_bc_1 (hpos : is_positive T):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
 begin
   apply basis.ext (e_vecs T hsa),
@@ -125,53 +102,182 @@ begin
   rw h,
   simp,
   rw lem_bc_0,
-  rw linear_map.map_smul_of_tower,
+  rw linear_map.map_smul,
   rw lem_bc_0,
   rw smul_smul,
-  rw sqrt_sqrt,
-  specialize hnn i,
-  exact hnn,
+  norm_cast,
+  rw real.mul_self_sqrt,
+  have hab : (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
+  begin
+    apply thm_7_35_a_b,
+    exact hpos
+  end,
+  specialize hab i,
+  exact hab,
 end
 
-lemma lem_bc_2 :
+lemma lem_bc_2 (hpos : is_positive T) :
   is_sa (sqrt T hsa) :=
 begin
   rw self_adjoint_iff,
   rw linear_map.eq_adjoint_iff_basis (e_vecs T hsa) (e_vecs T hsa),
   intros i j,
-  let μi := (e_vals T hsa) i,
-  let vi := (e_vecs T hsa) i,
-  let μj := (e_vals T hsa) j,
-  let vj := (e_vecs T hsa) j,
   rw lem_bc_0,
   rw lem_bc_0,
-  -- why doesn't this work?
-  -- rw @inner_smul_left ℂ (ℂ^n) _ _ (e_vecs T hsa i) (e_vecs T hsa j) (real.sqrt μi),
+  rw inner_smul_left,
+  rw inner_smul_right,
+  have hc : conj (real.sqrt (e_vals T hsa i) : ℂ) = (real.sqrt (e_vals T hsa i) : ℂ) :=
+  begin
+    rw complex.eq_conj_iff_real,
+    use (real.sqrt (e_vals T hsa i)),
+  end,
+  rw hc,
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  rw orthonormal_iff_ite at hon,
+  specialize hon i j,
+  rw hon,
+  by_cases hij : (i = j),
+  rw hij,
+  simp,
+  have hi : ite (i = j) (real.sqrt (e_vals T hsa i) : ℂ) 0 = 0 :=
+  begin
+    rw ← ite_not,
+    rw ite_eq_left_iff,
+    tauto,
+  end,
+  have hj : ite (i = j) (real.sqrt (e_vals T hsa j) : ℂ) 0 = 0 :=
+  begin
+    rw ← ite_not,
+    rw ite_eq_left_iff,
+    tauto,
+  end,
+  rw hi,
+  rw hj,
 end
 
-lemma lem_bc_3 :
+lemma evecs_on (i j : fin n) : ⟪ (e_vecs T hsa) i, (e_vecs T hsa) j ⟫_ℂ = ite (i = j) 1 0 :=
+begin
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  rw orthonormal_iff_ite at hon,
+  specialize hon i j,
+  exact hon,
+end
+
+lemma inner_evec_coords (x : ℂ^n) (i : fin n) :
+  ⟪ ((e_vecs T hsa) i), x ⟫_ℂ = (e_vecs T hsa).repr x i :=
+begin
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  rw orthonormal_iff_ite at hon,
+  conv
+  begin
+    to_lhs,
+    rw ← basis.sum_repr (e_vecs T hsa) x,
+    rw inner_sum,
+    congr,
+    skip,
+    funext,
+    rw inner_smul_right,
+    dedup,
+    rw evecs_on,
+    simp,
+  end,
+  rw finset.sum_ite,
+  simp,
+  rw finset.filter_eq,
+  simp,
+end
+
+lemma sqrt_repr (x : ℂ^n) (i : fin n) (hpos : is_positive T):
+  (e_vecs T hsa).repr ((sqrt T hsa) x) i = (real.sqrt(e_vals T hsa i)) • ((e_vecs T hsa).repr x i) :=
+begin
+  rw ← inner_evec_coords,
+  rw ← inner_evec_coords,
+  have hsqrt : is_sa (sqrt T hsa) :=
+  begin
+    apply lem_bc_2,
+    exact hpos,
+  end,
+  rw self_adjoint_iff at hsqrt,
+  rw linear_map.eq_adjoint_iff at hsqrt,
+  specialize hsqrt ((e_vecs T hsa) i) x,
+  rw ← hsqrt,
+  rw lem_bc_0,
+  rw inner_smul_left,
+  simp,
+end
+
+lemma lem_bc_3a (hpos : is_positive T) (x : ℂ^n) :
+  ⟪ (sqrt T hsa) x, x ⟫_ℂ.re ≥ 0 :=
+begin
+  rw ← basis.sum_repr (e_vecs T hsa) ((sqrt T hsa) x),
+  rw sum_inner,
+  conv
+  begin
+    to_lhs,
+    congr,
+    congr,
+    skip,
+    funext,
+    rw sqrt_repr T hsa x i hpos,
+    rw inner_smul_left,
+    rw inner_evec_coords,
+    rw is_R_or_C.conj_smul,
+    rw smul_mul_assoc,
+    rw ← complex.norm_sq_eq_conj_mul_self,
+  end,
+  norm_cast,
+  apply finset.sum_nonneg',
+  intro i,
+  have hnn : (∀ i : (fin n), 0 ≤ ((e_vals T hsa) i)) :=
+  begin
+    apply thm_7_35_a_b,
+    exact hpos,
+  end,
+  specialize hnn i,
+  by_cases hz : (e_vals T hsa) i = 0,
+  rw hz,
+  simp,
+  rw ne.le_iff_lt at hnn,
+  rw ← real.sqrt_pos at hnn,
+  rw ← div_le_iff',
+  simp,
+  apply complex.norm_sq_nonneg,
+  exact hnn,
+  symmetry,
+  norm_cast,
+  exact hz,
+end
+
+lemma lem_bc_3 (hpos : is_positive T) :
   is_positive (sqrt T hsa) :=
 begin
+  let R := (sqrt T hsa),
+  have hsaR : (is_sa R) := by exact lem_bc_2 T hsa hpos,
   rw is_positive,
-  sorry,
+  intro x,
+  rw lem_7_15 at hsaR,
+  split,
+  apply lem_bc_3a,
+  exact hpos,
+  specialize hsaR x,
+  rw ← complex.eq_conj_iff_im,
+  exact hsaR,
 end
 
-theorem thm_7_35_b_c (hsa : is_sa T) :
+
+/-
+A positive, self-adjoint linear operator T : ℂ^n → ℂ^n has a positive, self-adjoint square root.
+-/
+theorem thm_7_35_b_c (hsa : is_sa T) (hpos : is_positive T):
   ∃ (R : Lℂ^n), ((R * R) = T) ∧ (is_sa R) ∧ (is_positive R) :=
 begin
   use (sqrt T hsa),
   split,
   apply lem_bc_1,
+  exact hpos,
   split,
   apply lem_bc_2,
+  exact hpos,
   apply lem_bc_3,
-end
-
-end sec_7_35_b_c
-
-lemma lem_sqrt_gram :
-  ∃ (R : Lℂ^n), (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) :=
-begin
-  apply thm_7_35_b_c,
-  exact lem_gram_self_adjoint T,
+  exact hpos,
 end
