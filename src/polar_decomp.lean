@@ -177,12 +177,13 @@ end
 
 #check (S₁ T).to_linear_map
 
-def S₂ : T.range → (sqrt' T).range :=
-begin
-  intro x,
-  let y : (ℂ^n) ⧸  T.ker := ((linear_map.quot_ker_equiv_range T).symm).to_linear_map x,
-  let z : (ℂ^n) ⧸ (sqrt' T).ker := y,
-end
+
+-- def S₂ : T.range → (sqrt' T).range :=
+-- begin
+--   intro x,
+--   let y : (ℂ^n) ⧸  T.ker := ((linear_map.quot_ker_equiv_range T).symm).to_linear_map x,
+--   let z : (ℂ^n) ⧸ (sqrt' T).ker := y,
+-- end
 
 -- This is maybe the statement to prove?
 example : ∀ v : ℂ^n, (S₁ T).to_linear_map (linear_map.range_restrict T v) = (linear_map.range_restrict (sqrt' T)) v :=
