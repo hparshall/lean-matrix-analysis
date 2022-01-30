@@ -91,6 +91,10 @@ begin
   rw scaled_e_vecs,
 end
 
+/-
+We have √T^2 = T.
+-/
+
 lemma lem_bc_1 (hpos : is_positive T):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
 begin
@@ -115,6 +119,10 @@ begin
   specialize hab i,
   exact hab,
 end
+
+/-
+√T is self-adjoint.
+-/
 
 lemma lem_bc_2 (hpos : is_positive T) :
   is_sa (sqrt T hsa) :=
@@ -155,6 +163,10 @@ begin
   rw hj,
 end
 
+/-
+The basis of eigenvectors is orthonormal.
+-/
+
 lemma evecs_on (i j : fin n) : ⟪ (e_vecs T hsa) i, (e_vecs T hsa) j ⟫_ℂ = ite (i = j) 1 0 :=
 begin
   have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
@@ -162,6 +174,10 @@ begin
   specialize hon i j,
   exact hon,
 end
+
+/-
+Basis coordinates are given by the inner product.
+-/
 
 lemma inner_evec_coords (x : ℂ^n) (i : fin n) :
   ⟪ ((e_vecs T hsa) i), x ⟫_ℂ = (e_vecs T hsa).repr x i :=
@@ -187,6 +203,10 @@ begin
   simp,
 end
 
+/-
+√T scales basis coordinates by sqrt eigenvalues.
+-/
+
 lemma sqrt_repr (x : ℂ^n) (i : fin n) (hpos : is_positive T):
   (e_vecs T hsa).repr ((sqrt T hsa) x) i = (real.sqrt(e_vals T hsa i)) • ((e_vecs T hsa).repr x i) :=
 begin
@@ -205,6 +225,10 @@ begin
   rw inner_smul_left,
   simp,
 end
+
+/-
+√T is positive, real part.
+-/
 
 lemma lem_bc_3a (hpos : is_positive T) (x : ℂ^n) :
   ⟪ (sqrt T hsa) x, x ⟫_ℂ.re ≥ 0 :=
@@ -247,6 +271,10 @@ begin
   norm_cast,
   exact hz,
 end
+
+/-
+√T is positive.
+-/
 
 lemma lem_bc_3 (hpos : is_positive T) :
   is_positive (sqrt T hsa) :=
