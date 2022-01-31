@@ -4,6 +4,7 @@ on ℂ^n has a positive, self-adjoint square root.
 -/
 import .lemmas.ladr_7_lem
 import .ladr_7
+import .orthonormal_basis
 
 open_locale big_operators complex_conjugate matrix
 
@@ -26,11 +27,9 @@ The spectral theorem allows us to define √T
 
 lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := by exact finrank_euclidean_space_fin
 
-noncomputable def e_vals : (fin n → ℝ) :=
-  inner_product_space.is_self_adjoint.eigenvalues hsa hn
+noncomputable def e_vals : (fin n → ℝ) := hsa.eigenvalues hn
 
-noncomputable def e_vecs : (basis (fin n) ℂ (ℂ^n)) :=
-  @inner_product_space.is_self_adjoint.eigenvector_basis ℂ _ _ (ℂ^n) _ T hsa _ n hn
+noncomputable def e_vecs : (basis (fin n) ℂ (ℂ^n)) := hsa.eigenvector_basis hn
 
 noncomputable def scaled_e_vecs : (fin n) → ℂ^n :=
   λ (i : (fin n)), (real.sqrt(((e_vals T hsa) i)) : ℂ) • ((e_vecs T hsa) i)
@@ -91,6 +90,10 @@ begin
   rw scaled_e_vecs,
 end
 
+/-
+We have √T^2 = T.
+-/
+
 lemma lem_bc_1 (hpos : is_positive T):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
 begin
@@ -115,6 +118,10 @@ begin
   specialize hab i,
   exact hab,
 end
+
+/-
+√T is self-adjoint.
+-/
 
 lemma lem_bc_2 (hpos : is_positive T) :
   is_sa (sqrt T hsa) :=
@@ -155,43 +162,15 @@ begin
   rw hj,
 end
 
-lemma evecs_on (i j : fin n) : ⟪ (e_vecs T hsa) i, (e_vecs T hsa) j ⟫_ℂ = ite (i = j) 1 0 :=
-begin
-  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
-  rw orthonormal_iff_ite at hon,
-  specialize hon i j,
-  exact hon,
-end
-
-lemma inner_evec_coords (x : ℂ^n) (i : fin n) :
-  ⟪ ((e_vecs T hsa) i), x ⟫_ℂ = (e_vecs T hsa).repr x i :=
-begin
-  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
-  rw orthonormal_iff_ite at hon,
-  conv
-  begin
-    to_lhs,
-    rw ← basis.sum_repr (e_vecs T hsa) x,
-    rw inner_sum,
-    congr,
-    skip,
-    funext,
-    rw inner_smul_right,
-    dedup,
-    rw evecs_on,
-    simp,
-  end,
-  rw finset.sum_ite,
-  simp,
-  rw finset.filter_eq,
-  simp,
-end
+/-
+√T scales basis coordinates by sqrt eigenvalues.
+-/
 
 lemma sqrt_repr (x : ℂ^n) (i : fin n) (hpos : is_positive T):
   (e_vecs T hsa).repr ((sqrt T hsa) x) i = (real.sqrt(e_vals T hsa i)) • ((e_vecs T hsa).repr x i) :=
 begin
-  rw ← inner_evec_coords,
-  rw ← inner_evec_coords,
+  rw onb_coords_eq_inner,
+  rw onb_coords_eq_inner,
   have hsqrt : is_sa (sqrt T hsa) :=
   begin
     apply lem_bc_2,
@@ -204,13 +183,20 @@ begin
   rw lem_bc_0,
   rw inner_smul_left,
   simp,
+  apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
+  apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
 end
+
+/-
+√T is positive, real part.
+-/
 
 lemma lem_bc_3a (hpos : is_positive T) (x : ℂ^n) :
   ⟪ (sqrt T hsa) x, x ⟫_ℂ.re ≥ 0 :=
 begin
   rw ← basis.sum_repr (e_vecs T hsa) ((sqrt T hsa) x),
   rw sum_inner,
+  have hon : orthonormal ℂ (e_vecs T hsa) := by apply inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal,
   conv
   begin
     to_lhs,
@@ -220,7 +206,7 @@ begin
     funext,
     rw sqrt_repr T hsa x i hpos,
     rw inner_smul_left,
-    rw inner_evec_coords,
+    rw ← onb_coords_eq_inner (e_vecs T hsa) x i hon,
     rw is_R_or_C.conj_smul,
     rw smul_mul_assoc,
     rw ← complex.norm_sq_eq_conj_mul_self,
@@ -247,6 +233,10 @@ begin
   norm_cast,
   exact hz,
 end
+
+/-
+√T is positive.
+-/
 
 lemma lem_bc_3 (hpos : is_positive T) :
   is_positive (sqrt T hsa) :=
