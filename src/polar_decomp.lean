@@ -161,7 +161,7 @@ begin
   sorry,
 end
 
-noncomputable def S₁ : T.range ≃ₗ[ℂ] (sqrt' T).range :=
+noncomputable def S₁ : (sqrt' T).range ≃ₗ[ℂ] T.range :=
 begin
   have T_first :((ℂ^n) ⧸  T.ker) ≃ₗ[ℂ] T.range :=
   begin
@@ -171,8 +171,11 @@ begin
   begin
     exact linear_map.quot_ker_equiv_range (sqrt' T),
   end,
-  rw ker_eq_sqrt_ker at T_first,
-  exact (T_first.symm).trans (Q_first),
+  have same_quot : ((ℂ^n) ⧸  (sqrt' T).ker) ≃ₗ[ℂ] ((ℂ^n) ⧸  T.ker) :=
+  begin
+    exact submodule.quot_equiv_of_eq (sqrt' T).ker T.ker (ker_eq_sqrt_ker T).symm,
+  end,
+  exact (Q_first.symm).trans (same_quot.trans (T_first)),
 end
 
 #check (S₁ T).to_linear_map
@@ -185,12 +188,42 @@ end
 --   let z : (ℂ^n) ⧸ (sqrt' T).ker := y,
 -- end
 
--- This is maybe the statement to prove?
-example : ∀ v : ℂ^n, (S₁ T).to_linear_map (linear_map.range_restrict T v) = (linear_map.range_restrict (sqrt' T)) v :=
+noncomputable lemma quot_by_same_is_eq {M₁ M₂ : submodule ℂ ℂ^n} (h : M₁ = M₂) : ((ℂ^n) ⧸ M₁) ≃ₗ[ℂ] ((ℂ^n) ⧸ M₂) :=
 begin
-
-  sorry,
+  rw h,
 end
+
+example : ∀ v : ℂ^n, (sqrt' T).ker.mkq v = submodule.quot_equiv_of_eq T.ker (sqrt' T).ker (ker_eq_sqrt_ker T) (T.ker.mkq v) :=
+begin
+  intro v,
+  norm_cast,
+end
+
+lemma lem_7_45_1_a (v : ℂ^n) : ((linear_map.range_restrict T) v : ℂ^n) = (linear_map.quot_ker_equiv_range T) (submodule.quotient.mk v) :=
+begin
+  rw linear_map.quot_ker_equiv_range_apply_mk T v,
+  simp,
+end
+
+#check linear_map.quot_ker_equiv_range_apply_mk T
+
+-- This is maybe the statement to prove?
+lemma lem_7_45_1: ∀ v : ℂ^n, ((linear_map.range_restrict T v) : ℂ^n) = (S₁ T).to_linear_map ((linear_map.range_restrict (sqrt' T)) v) :=
+begin
+  intro v,
+  rw S₁,
+  simp,
+  -- linear_map.quot_ker_equiv_range_apply_mk
+  have : (linear_map.quot_ker_equiv_range (sqrt' T)).symm (linear_map.range_restrict (sqrt' T) v) = (sqrt' T).ker.mkq v :=
+  begin
+    rw ← linear_map.quot_ker_equiv_range_symm_apply_image (sqrt' T),
+    congr',
+  end,
+  rw this,
+  simp,
+end
+
+#check ((S₁ T).to_linear_map)
 
 
 lemma lem_7_45 : ∃ (S : Lℂ^n), (T = S * sqrt (T† * T) (adjoint_prod_sa T)) ∧ (is_isometry S) :=
