@@ -11,12 +11,6 @@ variable T : Lℂ^n
 def is_isometry (S: Lℂ^n) : Prop := ∀ (v : ℂ^n), ∥ S v ∥ = ∥ v ∥
 
 
-lemma inj_eq_surj_finite_dim (h : T.ker = ⊥) : T.range ≃ₗ[ℂ] ℂ^n :=
-begin
-  sorry,
-end
-
-
 lemma adjoint_prod_sa : is_sa (T† * T) :=
 begin
   intros x y,
@@ -50,6 +44,19 @@ lemma sqrt'_sq : ((sqrt' T) * (sqrt' T)) = T† * T :=
 begin
   rw sqrt',
   rw lem_bc_1,
+  rw is_positive,
+  intro x,
+  have : ⟪ (T† * T) x , x ⟫_ℂ = (∥ T x ∥^2 : ℂ) :=
+  begin
+    calc ⟪ (T† * T) x , x ⟫_ℂ = ⟪ T† (T x), x ⟫_ℂ : by {rw comp_eq_mul}
+      ...                       = ⟪ T x, T x ⟫_ℂ : by {rw linear_map.adjoint_inner_left}
+      ...                       = (∥ T x ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K},
+  end,
+  rw this,
+  split,
+  norm_cast,
+  exact pow_nonneg (norm_nonneg _) 2,
+  norm_cast,
 end
 
 --- This is a statement about the norm-squared. Later in the proof, they use just the norm,
@@ -64,7 +71,7 @@ begin
     ...          = ⟪ T† (T v), v ⟫_ℂ : by {rw linear_map.adjoint_inner_left}
     ...          = ⟪ (T† * T) v, v ⟫_ℂ : by {rw comp_eq_mul}
     ...          = ⟪ ((sqrt' T) * (sqrt' T)) v, v ⟫_ℂ : by {rw sqrt'_sq}
-    ...          = ⟪ sqrt' T v, sqrt' T v ⟫_ℂ : by {rw ← comp_eq_mul, rw ← linear_map.adjoint_inner_left, rw (sa_means_dag_eq_no_dag (sqrt' T) (lem_bc_2 (T† * T) (adjoint_prod_sa T))),}
+    ...          = ⟪ sqrt' T v, sqrt' T v ⟫_ℂ : by {rw ← comp_eq_mul, rw ← linear_map.adjoint_inner_left, rw (sa_means_dag_eq_no_dag )}-- (sqrt' T) (lem_bc_2 (T† * T) (adjoint_prod_sa T))),}
     ...          = (∥ (sqrt' T) v ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K},
 end
 
@@ -97,8 +104,8 @@ end
 #check linear_map.range T
 
 --- These definitions so that the definition of S₁ doesn't time out :/
-noncomputable def range_sqrt : submodule ℂ ℂ^n := linear_map.range (sqrt' T)
-noncomputable def range_T : submodule ℂ ℂ^n := linear_map.range T
+-- noncomputable def range_sqrt : submodule ℂ ℂ^n := linear_map.range (sqrt' T)
+-- noncomputable def range_T : submodule ℂ ℂ^n := linear_map.range T
 
 --- We need to define this (which by virtue of its definition would prove that it is linear):
 -- def S₁ : (range_sqrt T) →ₗ[ℂ] (range_T T) := sorry
@@ -134,32 +141,32 @@ end
 
 -- def lin_equiv_sqrt_T' : (ℂ^n) ≃ₗ[ℂ] (ℂ^n) := linear_equiv ((sqrt' T))
 
-lemma lem_7_45' (lin_equiv_sqrt_T : (ℂ^n) ≃ₗ[ℂ] (ℂ^n)) : ∃ (S : Lℂ^n), (T = S * lin_equiv_sqrt_T ) ∧ (is_isometry S) :=
-begin
-  let S₁ : Lℂ^n := T * lin_equiv_sqrt_T.symm,
-  use T * lin_equiv_sqrt_T.symm,
-  split,
-  ext1,
-  simp,
-  sorry,
-  -- rw ← linear_equiv.inv_fun_eq_symm,
-  -- linear_equiv.of_injective T (linear_map.ker_eq_bot.1 inj_T),
-  -- let sqr_inv_T : Lℂ^n := T * ((sqrt' T)⁻¹),
-end
+-- lemma lem_7_45' (lin_equiv_sqrt_T : (ℂ^n) ≃ₗ[ℂ] (ℂ^n)) : ∃ (S : Lℂ^n), (T = S * lin_equiv_sqrt_T ) ∧ (is_isometry S) :=
+-- begin
+--   let S₁ : Lℂ^n := T * lin_equiv_sqrt_T.symm,
+--   use T * lin_equiv_sqrt_T.symm,
+--   split,
+--   ext1,
+--   simp,
+--   sorry,
+--   -- rw ← linear_equiv.inv_fun_eq_symm,
+--   -- linear_equiv.of_injective T (linear_map.ker_eq_bot.1 inj_T),
+--   -- let sqr_inv_T : Lℂ^n := T * ((sqrt' T)⁻¹),
+-- end
 
-lemma lem_7_45'' (h : T.ker = ⊥) : ∃ (S : Lℂ^n), T = S * (sqrt' T) :=
-begin
-  rw ker_eq_sqrt_ker at h,
-  rw linear_map.ker_eq_bot at h,
-  let sqrt_T_equiv' : (ℂ^n) ≃ₗ[ℂ] (sqrt' T).range := linear_equiv.of_injective (sqrt' T) h,
+-- lemma lem_7_45'' (h : T.ker = ⊥) : ∃ (S : Lℂ^n), T = S * (sqrt' T) :=
+-- begin
+--   rw ker_eq_sqrt_ker at h,
+--   rw linear_map.ker_eq_bot at h,
+--   let sqrt_T_equiv' : (ℂ^n) ≃ₗ[ℂ] (sqrt' T).range := linear_equiv.of_injective (sqrt' T) h,
 
-  rw ← linear_map.ker_eq_bot at h,
-  let sqrt_T_equiv : (ℂ^n) ≃ₗ[ℂ] (ℂ^n) := linear_equiv.trans sqrt_T_equiv' (inj_eq_surj_finite_dim (sqrt' T) h),
+--   rw ← linear_map.ker_eq_bot at h,
+--   let sqrt_T_equiv : (ℂ^n) ≃ₗ[ℂ] (ℂ^n) := linear_equiv.trans sqrt_T_equiv' (inj_eq_surj_finite_dim (sqrt' T) h),
 
-  use (T * sqrt_T_equiv.symm),
+--   use (T * sqrt_T_equiv.symm),
 
-  sorry,
-end
+--   sorry,
+-- end
 
 noncomputable def S₁ : (sqrt' T).range ≃ₗ[ℂ] T.range :=
 begin
@@ -178,16 +185,6 @@ begin
   exact (Q_first.symm).trans (same_quot.trans (T_first)),
 end
 
-#check (S₁ T).to_linear_map
-
-
--- def S₂ : T.range → (sqrt' T).range :=
--- begin
---   intro x,
---   let y : (ℂ^n) ⧸  T.ker := ((linear_map.quot_ker_equiv_range T).symm).to_linear_map x,
---   let z : (ℂ^n) ⧸ (sqrt' T).ker := y,
--- end
-
 noncomputable lemma quot_by_same_is_eq {M₁ M₂ : submodule ℂ ℂ^n} (h : M₁ = M₂) : ((ℂ^n) ⧸ M₁) ≃ₗ[ℂ] ((ℂ^n) ⧸ M₂) :=
 begin
   rw h,
@@ -205,15 +202,12 @@ begin
   simp,
 end
 
-#check linear_map.quot_ker_equiv_range_apply_mk T
 
--- This is maybe the statement to prove?
-lemma lem_7_45_1: ∀ v : ℂ^n, ((linear_map.range_restrict T v) : ℂ^n) = (S₁ T).to_linear_map ((linear_map.range_restrict (sqrt' T)) v) :=
+lemma lem_7_45_1: ∀ v : ℂ^n, (T v : ℂ^n) = (S₁ T) ((linear_map.range_restrict (sqrt' T)) v) :=
 begin
   intro v,
   rw S₁,
   simp,
-  -- linear_map.quot_ker_equiv_range_apply_mk
   have : (linear_map.quot_ker_equiv_range (sqrt' T)).symm (linear_map.range_restrict (sqrt' T) v) = (sqrt' T).ker.mkq v :=
   begin
     rw ← linear_map.quot_ker_equiv_range_symm_apply_image (sqrt' T),
@@ -223,7 +217,67 @@ begin
   simp,
 end
 
-#check ((S₁ T).to_linear_map)
+-- We need to find some way to show this
+-- It feels like the way that pullbacks happen with Lean are with sets,
+-- But I don't really know how to convert to them.
+lemma pullback_term (z : linear_map.range (sqrt' T)) : ∃ x : ℂ^n, z = linear_map.range_restrict(sqrt' T) x :=
+begin
+  sorry
+end
+
+
+lemma S_1_preserves_norm_sq (z : linear_map.range (sqrt' T)) : ∥ (z : ℂ^n) ∥^2 = ∥ (((S₁ T) z) : ℂ^n) ∥^2  :=
+begin
+  cases (pullback_term T z) with x hₓ,
+  rw hₓ,
+  rw ← lem_7_45_1 T x,
+  rw eq_7_46,
+  congr',
+end
+
+lemma S_1_preserves_norm' (z : linear_map.range (sqrt' T)) : ∥ (z : ℂ^n) ∥ = ∥ (((S₁ T) z) : ℂ^n) ∥  :=
+begin
+  calc ∥ z ∥ = real.sqrt (∥ z ∥^2) : by {rw real.sqrt_sq (norm_nonneg z)}
+  ...        = real.sqrt (∥ (((S₁ T) z) : ℂ^n) ∥^2 ) : by {rw ← S_1_preserves_norm_sq T z, congr}
+  ...        = ∥ (S₁ T) z ∥ : by {rw ← real.sqrt_sq (norm_nonneg ((S₁ T) z)), congr'},
+
+end
+
+lemma S_1_preserves_norm (z : linear_map.range (sqrt' T)) : ∥ z ∥ = ∥ (S₁ T) z ∥ :=
+begin
+  calc ∥ z ∥ = ∥ (z : ℂ^n) ∥ : by {congr'}
+  ...       = ∥ (((S₁ T) z) : ℂ^n) ∥ : S_1_preserves_norm' T z
+  ...       = ∥ (S₁ T) z ∥ : by {congr'},
+end
+
+
+lemma isometry_if_preserves_norm {A B : submodule ℂ ℂ^n} (f : A →ₗ[ℂ] B) (h : ∀ z : A, ∥ z ∥ = ∥ f z ∥) : ∀ x y : A, ⟪ f x, f y ⟫_ℂ = ⟪ x , y ⟫_ℂ :=
+begin
+  intros x y,
+  rw inner_eq_sum_norm_sq_div_four (f x) (f y),
+  rw inner_eq_sum_norm_sq_div_four x y,
+  simp only [is_R_or_C.I_to_complex],
+  rw [← linear_map.map_smul, ← map_add, ← map_sub, ← map_add, ← map_sub],
+  iterate {rw h},
+end
+
+lemma lem_7_45_2 : ∃ S₁' : linear_isometry_equiv (ring_hom.id ℂ) (sqrt' T).range T.range, ∀ v : ℂ^n,
+    (S₁' ((linear_map.range_restrict (sqrt' T)) v): ℂ^n) = T v :=
+  begin
+    have fact_isometry : ∀ x y : (sqrt' T).range, ⟪ (S₁ T) x, (S₁ T) y ⟫_ℂ = ⟪ x , y⟫_ℂ :=
+    begin
+      exact isometry_if_preserves_norm ((S₁ T).to_linear_map) (S_1_preserves_norm T),
+    end,
+    let S₁' := linear_equiv.isometry_of_inner (S₁ T) fact_isometry,
+    have : S₁'.to_linear_equiv = S₁ T :=
+    begin
+      rw linear_equiv.isometry_of_inner_to_linear_equiv,
+    end,
+    use S₁',
+    intro v,
+    simp only [linear_equiv.coe_isometry_of_inner],
+    rw lem_7_45_1,
+  end
 
 
 lemma lem_7_45 : ∃ (S : Lℂ^n), (T = S * sqrt (T† * T) (adjoint_prod_sa T)) ∧ (is_isometry S) :=
