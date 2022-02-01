@@ -2,6 +2,7 @@ import .ladr_7_35
 import .ladr_7
 import .lemmas.ladr_7_lem
 import linear_algebra.basic
+import .gram
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 -- notation `is_sa` := inner_product_space.is_self_adjoint
@@ -71,7 +72,7 @@ begin
     ...          = ⟪ T† (T v), v ⟫_ℂ : by {rw linear_map.adjoint_inner_left}
     ...          = ⟪ (T† * T) v, v ⟫_ℂ : by {rw comp_eq_mul}
     ...          = ⟪ ((sqrt' T) * (sqrt' T)) v, v ⟫_ℂ : by {rw sqrt'_sq}
-    ...          = ⟪ sqrt' T v, sqrt' T v ⟫_ℂ : by {rw ← comp_eq_mul, rw ← linear_map.adjoint_inner_left, rw (sa_means_dag_eq_no_dag )}-- (sqrt' T) (lem_bc_2 (T† * T) (adjoint_prod_sa T))),}
+    ...          = ⟪ sqrt' T v, sqrt' T v ⟫_ℂ : by {rw ← comp_eq_mul, rw ← linear_map.adjoint_inner_left, rw (sa_means_dag_eq_no_dag (sqrt' T) (lem_bc_2 (T† * T) (adjoint_prod_sa T) (gram_pos T)))}-- (sqrt' T) (lem_bc_2 (T† * T) (adjoint_prod_sa T))),}
     ...          = (∥ (sqrt' T) v ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K},
 end
 
@@ -222,7 +223,15 @@ end
 -- But I don't really know how to convert to them.
 lemma pullback_term (z : linear_map.range (sqrt' T)) : ∃ x : ℂ^n, z = linear_map.range_restrict(sqrt' T) x :=
 begin
-  sorry
+  -- cases (set.surjective_onto_range _ _ (sqrt' T).to_fun z) with ,
+  have : ∃ x : ℂ^n, (set.range_factorization(sqrt' T)) x = z,
+  begin
+    apply set.surjective_onto_range,
+  end,
+  cases this with x hₓ,
+  use x,
+  rw ← hₓ,
+  congr',
 end
 
 
