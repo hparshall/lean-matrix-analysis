@@ -188,7 +188,7 @@ lemma lem_7_45_2 : ∃ S₁' : linear_isometry_equiv (ring_hom.id ℂ) (R).range
   end
 
 
-lemma lem_7_45 : ∃ (S : linear_isometry_equiv (ring_hom.id ℂ) (ℂ^n) (ℂ^n)), ∀ v : ℂ^n, (T v = S (sqrt (T† * T) (adjoint_prod_sa T) v)) :=
+lemma lem_7_45 : ∃ (S : linear_isometry_equiv (ring_hom.id ℂ) (ℂ^n) (ℂ^n)), ∀ v : ℂ^n, (T v = S (R v)) :=
 begin
   sorry,
 end
