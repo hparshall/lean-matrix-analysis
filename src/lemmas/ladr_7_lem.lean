@@ -4,18 +4,19 @@ import analysis.inner_product_space.pi_L2
 import analysis.inner_product_space.spectrum
 import analysis.normed_space.pi_Lp
 
-variable n : ℕ
+variable {n : ℕ}
 def C : Type := euclidean_space ℂ (fin n)
 
 notation `C` n := euclidean_space ℂ (fin n)
 notation `ℂ^` n := euclidean_space ℂ (fin n)
 notation `Lℂ^` n := module.End ℂ ℂ^n
 
+notation `is_sa` := inner_product_space.is_self_adjoint
 notation `I` := complex.I
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 
-variable T : module.End ℂ ℂ^n
+variable {T : module.End ℂ ℂ^n}
 
 example (v : ℂ^n) : v = v :=
 begin
@@ -43,7 +44,7 @@ begin
   rw comp_eq_mul'',
 end
 
-lemma mul_adjoint (A B : Lℂ^n) : (A * B)† = B† * A† := adjoint_prod n A B
+lemma mul_adjoint (A B : Lℂ^n) : (A * B)† = B† * A† := adjoint_prod A B
 
 lemma sub_adjoint (A B : Lℂ^n) : (A - B)† = A† - B† := by {simp}
 
@@ -60,4 +61,37 @@ begin
   intro h,
   rw h,
   simp,
+end
+
+
+lemma adjoint_prod_sa : is_sa (T† * T) :=
+begin
+  intros x y,
+  rw ← linear_map.adjoint_inner_right,
+  rw mul_adjoint,
+  rw linear_map.adjoint_adjoint,
+end
+
+lemma sa_means_dag_eq_no_dag : (is_sa T) → T† = T :=
+begin
+  intro h,
+  ext1,
+  have : T† x - T x = 0 :=
+  begin
+    apply inner_with_all_eq_zero_eq_zero,
+    intro u,
+
+    calc ⟪ u , (T† x) - (T x) ⟫_ℂ = ⟪ u, T† x ⟫_ℂ - ⟪ u , T x ⟫_ℂ : by {rw inner_sub_right}
+    ...                      = ⟪ T u, x ⟫_ℂ - ⟪ u , T x ⟫_ℂ : by {rw linear_map.adjoint_inner_right}
+    ...                      = ⟪ u, T x ⟫_ℂ - ⟪ u, T x ⟫_ℂ : by {rw (h u x)}
+    ...                      = 0 : by {ring},
+  end,
+  rw sub_eq_zero at this,
+  exact this,
+end
+
+
+noncomputable lemma quot_by_same_is_eq {M₁ M₂ : submodule ℂ ℂ^n} (h : M₁ = M₂) : ((ℂ^n) ⧸ M₁) ≃ₗ[ℂ] ((ℂ^n) ⧸ M₂) :=
+begin
+  rw h,
 end
