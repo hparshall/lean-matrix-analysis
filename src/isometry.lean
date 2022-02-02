@@ -34,8 +34,6 @@ S has an orthonormal basis.
 
 noncomputable def onbasis := orthonormal_basis ℂ S
 
-#check onbasis S
-
 lemma hb_on : orthonormal ℂ (onbasis S) := by apply orthonormal_basis_orthonormal
 
 /-
@@ -76,6 +74,8 @@ begin
   rw ← orthonormal_iff_ite,
   apply orthonormal_basis_orthonormal ℂ,
 end
+
+-- need to generalize this one
 
 lemma b_distinct (i j : (orthonormal_basis_index ℂ S)): (i = j) ↔ ((b_to_Cn S i) = (b_to_Cn S j)) :=
 begin
@@ -152,4 +152,72 @@ end
 lemma extend_b_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ b_in_Cn S) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
 begin
   apply exists_subset_is_orthonormal_basis (hb_still_on S),
+end
+
+/-
+Extend the image of the orthonormal basis to an orthonormal basis.
+-/
+
+lemma hLb_still_on : orthonormal ℂ (coe : set.range (L ∘ onbasis S) → ℂ^n) :=
+begin
+  rw orthonormal_subtype_iff_ite,
+  intros v hv w hw,
+  rw set.mem_range at hv hw,
+  cases hv with i hi,
+  cases hw with j hj,
+  have hon : orthonormal ℂ (L ∘ onbasis S) := by apply hLb_on,
+  have hvw : ⟪v, w⟫_ℂ = ite (i = j) 1 0 :=
+  begin
+    rw ← hi,
+    rw ← hj,
+    rw orthonormal_iff_ite at hon,
+    specialize hon i j,
+    exact hon,
+  end,
+  rw hvw,
+  have hij : ¬i = j → ¬v = w :=
+  begin
+    contrapose,
+    push_neg,
+    intro hv_eq_w,
+    rw hv_eq_w at hvw,
+    rw orthonormal_iff_ite at hon,
+    specialize hon j j,
+    rw ← hj at hvw,
+    rw hon at hvw,
+    simp only [if_true, eq_self_iff_true] at hvw,
+    have : @ite ℂ (i = j) _ 1 0 = 1 :=
+    begin
+      symmetry,
+      exact hvw,
+    end,
+    rw ne.ite_eq_left_iff at this,
+    exact this,
+    simp only [ne.def, not_false_iff, one_ne_zero],
+  end,
+  by_cases i = j,
+  rw ← hi,
+  rw ← hj,
+  rw h,
+  simp only [if_true, eq_self_iff_true, function.comp_app, linear_isometry.map_eq_iff],
+  have hl : @ite ℂ (i = j) _ 1 0 = 0 :=
+  begin
+    rw ne.ite_eq_right_iff,
+    exact h,
+    simp only [ne.def, not_false_iff, one_ne_zero],
+  end,
+  have hr : @ite ℂ (v = w) _ 1 0 = 0 :=
+  begin
+    rw ne.ite_eq_right_iff,
+    apply hij,
+    exact h,
+    simp only [ne.def, not_false_iff, one_ne_zero],
+  end,
+  rw hl,
+  rw hr,
+end
+
+lemma extend_Lb_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
+begin
+  apply exists_subset_is_orthonormal_basis (hLb_still_on S L),
 end
