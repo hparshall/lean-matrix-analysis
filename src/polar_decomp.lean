@@ -45,22 +45,6 @@ begin
   exact eq_7_46' T v,
 end
 
---- The key step for S₁ being well-defined:
-lemma lem_7_45_a : ∀ u v : ℂ^n, R u = R v → T u = T v :=
-begin
-  intros u v h,
-  have : ∥ T u - T v ∥^2 = 0 :=
-  begin
-    calc ∥ T u - T v ∥^2 = ∥ T (u - v) ∥^2 : by {rw map_sub T u v}
-    ...                  = ∥ R (u - v) ∥^2 : by {rw eq_7_46}
-    ...                  = ∥ R u - R v ∥^2 : by {rw map_sub}
-    ...                  = 0 : by {rw [h, sub_self], simp},
-  end,
-  rw norm_sq_eq_zero at this,
-  rw ← sub_eq_zero,
-  exact this,
-end
-
 lemma ker_eq_sqrt_ker : T.ker = (R).ker :=
 begin
   ext,
