@@ -28,9 +28,9 @@ begin
     simp,
   end,
   rw finset.sum_ite,
-  simp,
+  simp only [add_zero, finset.sum_const_zero, finset.filter_congr_decidable, finset.sum_congr],
   rw finset.filter_eq,
-  simp,
+  simp only [finset.mem_univ, if_true, eq_self_iff_true, finset.sum_singleton, finset.sum_congr],
 end
 
 lemma onb_sum_repr (hon : orthonormal ℂ b):
