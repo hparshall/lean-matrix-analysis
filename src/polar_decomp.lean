@@ -24,6 +24,12 @@ begin
   exact this.1,
 end
 
+lemma R_pos : is_positive R :=
+begin
+  have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram T),
+  exact this.2.2,
+end
+
 -- This is the actual proof the statement, but we use it in the form eq_7_46, since it's really a statement
 -- about real numbers.
 lemma eq_7_46': ∀ (v : ℂ^n), (∥ T v ∥^2 : ℂ) = (∥ R v ∥^2 : ℂ) :=
