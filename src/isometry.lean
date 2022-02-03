@@ -47,7 +47,9 @@ Since L is an isometry, it maps the orthonormal basis to an orthonormal set.
 -/
 
 lemma hLb_on : orthonormal ℂ (L ∘ onbasis S) :=
-  by apply orthonormal.comp_linear_isometry (hb_on S)
+begin
+  apply @orthonormal.comp_linear_isometry ℂ S _ _ _ _ _ _ (hb_on S) L,
+end
 
 /-
 Extend the basis b for S to an orthonormal basis for ℂ^n.
@@ -220,4 +222,28 @@ end
 lemma extend_Lb_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
 begin
   apply exists_subset_is_orthonormal_basis (hLb_still_on S L),
+end
+
+--- will need M an isometry
+lemma L_to_M : ∃ (M : ((ℂ^n) → ℂ^n)), ∀ (s : S), M s = L s :=
+begin
+  have hb : ∃ (u : set ℂ^n) (H : u ⊇ b_in_Cn S) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
+    by apply extend_b_in_Cn S,
+  cases hb with u hb,
+  cases hb with H hb,
+  cases hb with b hb,
+  cases hb with hb_on hb_coe,
+  have hLb : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
+    by apply extend_Lb_in_Cn S L,
+  cases hLb with Lu hLb,
+  cases hLb with LH hLb,
+  cases hLb with Lb hLb,
+  cases hLb with hLb_on hLb_coe,
+  rw b_in_Cn at H,
+  rw b_to_Cn at H,
+  -- how best to write this function?
+  -- if (b x) is in (onbasis S), send it to L (b x)
+  -- else, send it to F (b x) for an arbitrary bijection F between complementary bases
+  let M1 := λ (x : u), ite (b x ∈ set.range ↑(onbasis S)) (L b x) (F x),
+  sorry,
 end
