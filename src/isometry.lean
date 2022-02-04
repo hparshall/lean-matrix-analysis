@@ -11,6 +11,7 @@ import analysis.inner_product_space.spectrum
 import analysis.normed_space.pi_Lp
 import linear_algebra.basis
 import .lemmas.ladr_7_lem
+import .linear_independent
 
 open_locale big_operators complex_conjugate matrix
 
@@ -22,11 +23,11 @@ local attribute [instance] fact_one_le_two_real
 S is also a finite dimensional inner product space.
 -/
 
-noncomputable lemma hS_module : module ℂ S := by apply submodule.module
+noncomputable lemma hS_module : module ℂ S := submodule.module S
 
-noncomputable lemma hS_ips : inner_product_space ℂ S := by apply submodule.inner_product_space
+noncomputable lemma hS_ips : inner_product_space ℂ S := submodule.inner_product_space S
 
-lemma hS_fd : finite_dimensional ℂ S := by apply finite_dimensional.finite_dimensional_submodule
+lemma hS_fd : finite_dimensional ℂ S := finite_dimensional.finite_dimensional_submodule S
 
 /-
 S has an orthonormal basis.
@@ -34,22 +35,7 @@ S has an orthonormal basis.
 
 noncomputable def onbasis := orthonormal_basis ℂ S
 
-lemma hb_on : orthonormal ℂ (onbasis S) := by apply orthonormal_basis_orthonormal
-
-/-
-Let L : S → ℂ^n be an isometry.
--/
-
-variable (L : S →ₗᵢ[ℂ] ℂ^n)
-
-/-
-Since L is an isometry, it maps the orthonormal basis to an orthonormal set.
--/
-
-lemma hLb_on : orthonormal ℂ (L ∘ onbasis S) :=
-begin
-  apply @orthonormal.comp_linear_isometry ℂ S _ _ _ _ _ _ (hb_on S) L,
-end
+lemma hb_on : orthonormal ℂ (onbasis S) := orthonormal_basis_orthonormal ℂ S
 
 /-
 Extend the basis b for S to an orthonormal basis for ℂ^n.
@@ -77,36 +63,8 @@ begin
   apply orthonormal_basis_orthonormal ℂ,
 end
 
--- need to generalize this one
-
-lemma b_distinct (i j : (orthonormal_basis_index ℂ S)): (i = j) ↔ ((b_to_Cn S i) = (b_to_Cn S j)) :=
-begin
-  split,
-    intro hij,
-    rw hij,
-    contrapose,
-    intro hij,
-    have hbb : ⟪ (b_to_Cn S i), (b_to_Cn S j) ⟫_ℂ = 0 :=
-    begin
-      have hon : (orthonormal ℂ (b_to_Cn S)) := by apply b_still_on,
-      rw orthonormal_iff_ite at hon,
-      rw hon,
-      rw ite_eq_right_iff,
-      contrapose,
-      intro dumb,
-      exact hij,
-    end,
-    by_contradiction,
-    rw h at hbb,
-    have hon2 : (orthonormal ℂ (b_to_Cn S)) := by apply b_still_on,
-    rw orthonormal_iff_ite at hon2,
-    specialize hon2 j j,
-    simp at hon2,
-    simp at hbb,
-    rw hon2 at hbb,
-    simp only [one_ne_zero] at hbb,
-    exact hbb,
-end
+lemma b_distinct (i j : (orthonormal_basis_index ℂ S)): (b_to_Cn S i) = (b_to_Cn S j) ↔ i = j :=
+  linear_independent_distinct (b_still_on S).linear_independent
 
 lemma hb_still_on : orthonormal ℂ (coe : (b_in_Cn S) → ℂ^n) :=
 begin
@@ -124,19 +82,19 @@ begin
   rw hon,
   have hji : ¬(i = j) ↔ ¬((b_to_Cn S i) = (b_to_Cn S j)) :=
   begin
-    have hij : (i = j) ↔ ((b_to_Cn S i) = (b_to_Cn S j)) := by apply b_distinct,
+    have hij : ((b_to_Cn S i) = (b_to_Cn S j)) ↔ (i = j) := by apply b_distinct,
     cases hij with lr rl,
     split,
     contrapose,
     push_neg,
-    exact rl,
+    exact lr,
     contrapose,
     push_neg,
-    exact lr,
+    exact rl,
   end,
   rw ite_eq_iff,
   by_cases (i = j),
-  rw b_distinct,
+  rw ← b_distinct,
   left,
   rw h,
   simp only [if_true, eq_self_iff_true, and_self],
@@ -152,13 +110,26 @@ begin
 end
 
 lemma extend_b_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ b_in_Cn S) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
-begin
-  apply exists_subset_is_orthonormal_basis (hb_still_on S),
-end
+  exists_subset_is_orthonormal_basis (hb_still_on S)
+
+/-
+Let L : S → ℂ^n be an isometry.
+-/
+
+variable (L : S →ₗᵢ[ℂ] ℂ^n)
+
+/-
+Since L is an isometry, it maps the orthonormal basis to an orthonormal set.
+-/
+
+lemma hLb_on : orthonormal ℂ (L ∘ onbasis S) := (hb_on S).comp_linear_isometry L
 
 /-
 Extend the image of the orthonormal basis to an orthonormal basis.
 -/
+
+lemma Lb_distinct (i j : (orthonormal_basis_index ℂ S)): (L ∘ onbasis S) i = (L ∘ onbasis S) j ↔ i = j :=
+  linear_independent_distinct (hLb_on S L).linear_independent
 
 lemma hLb_still_on : orthonormal ℂ (coe : set.range (L ∘ onbasis S) → ℂ^n) :=
 begin
@@ -181,21 +152,11 @@ begin
   begin
     contrapose,
     push_neg,
-    intro hv_eq_w,
-    rw hv_eq_w at hvw,
-    rw orthonormal_iff_ite at hon,
-    specialize hon j j,
-    rw ← hj at hvw,
-    rw hon at hvw,
-    simp only [if_true, eq_self_iff_true] at hvw,
-    have : @ite ℂ (i = j) _ 1 0 = 1 :=
-    begin
-      symmetry,
-      exact hvw,
-    end,
-    rw ne.ite_eq_left_iff at this,
-    exact this,
-    simp only [ne.def, not_false_iff, one_ne_zero],
+    rw ← hi,
+    rw ← hj,
+    intro h,
+    rw Lb_distinct at h,
+    exact h,
   end,
   by_cases i = j,
   rw ← hi,
@@ -220,9 +181,7 @@ begin
 end
 
 lemma extend_Lb_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
-begin
-  apply exists_subset_is_orthonormal_basis (hLb_still_on S L),
-end
+  exists_subset_is_orthonormal_basis (hLb_still_on S L)
 
 --- will need M an isometry
 lemma L_to_M : ∃ (M : ((ℂ^n) → ℂ^n)), ∀ (s : S), M s = L s :=
