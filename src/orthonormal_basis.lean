@@ -14,7 +14,7 @@ lemma onb_coords_eq_inner (i : fin n) (hon : orthonormal ℂ b) :
 begin
   rw orthonormal_iff_ite at hon,
   specialize hon i,
-  conv
+  conv -- To get past binders (functions, qualifiers etc.)
   begin
     to_rhs,
     rw ← b.sum_repr v,
