@@ -183,63 +183,50 @@ end
 lemma extend_Lb_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
   exists_subset_is_orthonormal_basis (hLb_still_on S L)
 
---- will need M an isometry
--- lemma L_to_M : ∃ (M : ((ℂ^n) → ℂ^n)), ∀ (s : S), M s = L s :=
--- begin
---   let v := b_in_Cn S,
---   have hb : ∃ (u : set ℂ^n) (H : u ⊇ v) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
---     by apply extend_b_in_Cn S,
---   cases hb with u hb,
---   cases hb with h_uv hb,
---   cases hb with b_u hb,
---   cases hb with hb_on hb_coe,
---   let Lv := set.range (L ∘ onbasis S),
---   have hLb : ∃ (Mu : set ℂ^n) (H : Mu ⊇ Lv) (b : basis Mu ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
---     by apply extend_Lb_in_Cn S L,
---   cases hLb with Mu hLb,
---   cases hLb with h_MuLv hLb,
---   cases hLb with b_Mu hLb,
---   cases hLb with hLb_on hLb_coe,
+lemma L_to_M : ∃ (M : ((ℂ^n) → ℂ^n)), ∀ (s : S), M s = L s :=
+begin
+  let v := set.range (S.subtype ∘ (onbasis S)),
+  have hb : ∃ (u : set ℂ^n) (H : u ⊇ v) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
+    by apply extend_b_in_Cn S,
+  cases hb with u hb,
+  cases hb with h_uv hb,
+  cases hb with b_u hb,
+  cases hb with hb_on hb_coe,
 
---   have fintype_u : fintype u :=
---   begin
---     apply basis.fintype_index_of_dim_lt_omega b_u,
---     rw ← finite_dimensional.finrank_eq_dim,
---     simp only [fintype.card_fin, finrank_euclidean_space],
---     apply cardinal.nat_lt_omega,
---   end,
+  let Lv := set.range (L ∘ onbasis S),
+  have hLb : ∃ (Mu : set ℂ^n) (H : Mu ⊇ Lv) (b : basis Mu ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
+    by apply extend_Lb_in_Cn S L,
+  cases hLb with Mu hLb,
+  cases hLb with h_MuLv hLb,
+  cases hLb with b_Mu hLb,
+  cases hLb with hLb_on hLb_coe,
 
---   have finset_u : finset u := @finset.univ _ fintype_u,
+  -- here, f is L, but currently L : S → ℂ^n and v = set.range (S.subtype ∘ (onbasis S))
+  have v_to_Lv : ∃ (f : v → Lv), function.bijective f := sorry,
 
---   have fintype_Mu : fintype Mu :=
---   begin
---     apply basis.fintype_index_of_dim_lt_omega b_Mu,
---     rw ← finite_dimensional.finrank_eq_dim,
---     simp only [fintype.card_fin, finrank_euclidean_space],
---     apply cardinal.nat_lt_omega,
---   end,
+  let f := classical.some v_to_Lv,
 
---   have finset_Mu : finset Mu := @finset.univ _ fintype_Mu,
+  have fintype_u : fintype u := sorry,
 
---   have fintype_v : fintype (set.range (onbasis S)) := sorry,
+  have fintype_Mu : fintype Mu := sorry,
 
---   have fintype_Lv : fintype Lv := sorry,
+  have card_u_Mu : @fintype.card u fintype_u = @fintype.card Mu fintype_Mu := sorry,
 
---   -- need to restrict codomain too
---   let v_to_Lv :=
---     set.cod_restrict (set.restrict L (set.range (onbasis S))) (Lv),
+  have fintype_v : fintype v := set.fintype_range (⇑(submodule.subtype S) ∘ ⇑(onbasis S)),
 
---   have v_to_Lv_bij : function.bijective v_to_Lv := sorry,
+  have fintype_Lv : fintype Lv := set.fintype_range (⇑L ∘ ⇑(onbasis S)),
 
---   have : @fintype.card (set.range (onbasis S)) fintype_v = 
---     @fintype.card Lv fintype_Lv :=
---   begin
---     apply fintype.card_of_bijective v_to_Lv_bij,
-    
---   end,
-  
-  
+  have card_v_Lv : @fintype.card v fintype_v = @fintype.card Lv fintype_Lv := sorry,
 
---   sorry,
--- end
+  have fintype_vc : fintype (u.diff v) := sorry,
 
+  have fintype_Lvc : fintype (Mu.diff Lv) := sorry,
+
+  have card_vc_Lvc : @fintype.card (u.diff v) fintype_vc = @fintype.card (Mu.diff Lv) fintype_Lvc := sorry,
+
+  have vc_to_Lvc : ∃ (g : u.diff v → Mu.diff Lv), function.bijective g := sorry,
+
+  let g := classical.some vc_to_Lvc,
+
+  -- how to define a bijection M1 from u to Mu using f on v and g on u.diff v?
+end
