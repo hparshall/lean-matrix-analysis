@@ -203,26 +203,55 @@ begin
   cases hLb with b_Mu hLb,
   cases hLb with hLb_on hLb_coe,
 
-  let vc := u.diff v,
+  have h_f : ∀ (x : (orthonormal_basis_index ℂ S)), (f x) ∈ u := sorry,
 
-  let Lvc := Mu.diff v,
+  let f_to_u := set.cod_restrict f u h_f,
 
-  have vc_to_Lvc : ∃ (e : vc → ℂ^n), (function.bijective e) ∧ (set.range e = Lvc) := sorry,
-
-  let e := classical.some vc_to_Lvc,
+  have fintype_u : fintype u := by apply finite_dimensional.fintype_basis_index b_u,
+  have fintype_Mu : fintype Mu := by apply finite_dimensional.fintype_basis_index b_Mu,
   
-  have h_vc : vc ⊆ u := by apply set.diff_subset u v,
+  have : @fintype.card u fintype_u = @fintype.card Mu fintype_Mu := sorry,
 
-  have h_e' : ∃ (e' : u → ℂ^n), ∀ (x : vc), e' (set.inclusion h_vc x) = e x :=
+  have fintype_v : fintype v := set.fintype_range f,
+  have fintype_Lv : fintype Lv := set.fintype_range g,
+
+  have : @fintype.card v fintype_v = @fintype.card Lv fintype_Lv := sorry,
+
+  let vc := u.diff v,
+  let Lvc := Mu.diff Lv,
+
+  have fintype_vc : fintype vc := sorry,
+  have fintype_Lvc : fintype Lvc := sorry,
+
+  have h_card_vc : @fintype.card vc fintype_vc = @fintype.card Lvc fintype_Lvc := sorry,
+
+  rw fintype.card_eq at h_card_vc,
+
+  have h_e1 : ∃ (e1 : vc ≃ Lvc), true := exists_true_iff_nonempty.mpr h_card_vc,
+
+  let e1 := classical.some h_e1,
+
+  let e2 := ⇑e1,
+
+  have h_e2 : (function.bijective e2) := equiv.bijective e1,
+
+  have : Lvc ⊆ set.univ := set.subset_univ Lvc,
+
+  let e := (equiv.set.univ (ℂ^n)) ∘ (set.inclusion this) ∘ e2,
+
+  have h_e : (function.injective e) ∧ (set.range e = Lvc) :=
+  begin
+    sorry,
+  end,
+  
+  have h_vc : vc ⊆ u := set.diff_subset u v,
+
+  have h_e' : ∃ (e' : u → ℂ^n), ∀ (x : vc), e' ((set.inclusion h_vc x)) = e x :=
   begin
     sorry,
   end,
 
   let e' := classical.some h_e',
-
-  have h_f : ∀ (x : (orthonormal_basis_index ℂ S)), (f x) ∈ u := sorry,
-
-  let f_to_u := set.cod_restrict f u h_f,
 
   /-
   function.extend gives a map M : u → ℂ^n where for x = f i ∈ v,
@@ -236,5 +265,8 @@ begin
 
   let M := (basis.constr b_u ℂ) M1,
   use M,
+  split,
+  intro s,
+  rw basis.constr_apply,
   sorry,
 end
