@@ -95,3 +95,14 @@ noncomputable lemma quot_by_same_is_eq {M₁ M₂ : submodule ℂ ℂ^n} (h : M�
 begin
   rw h,
 end
+
+
+lemma norm_sq_one_norm_eq_one (v : ℂ^n) : ∥ v ∥^2 = 1 → ∥ v ∥ = 1 :=
+begin
+  intro h,
+  rw ← real.sqrt_eq_iff_sq_eq at h,
+  rw ← h,
+  exact real.sqrt_one,
+  exact zero_le_one,
+  exact norm_nonneg v,
+end
