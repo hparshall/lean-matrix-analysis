@@ -148,7 +148,8 @@ begin
     },
     simp,
   }
-    ...                = ∑ (x : ι) in finset.filter (λ x, x = i ∨ x = j) finset.univ, ite (x = i) (v x) (-(v x)) : by {rw finset.sum_ite, rw finset.sum_const_zero, simp}
+    ...                = ∑ (x : ι) in finset.filter (λ x, x = i ∨ x = j) finset.univ, ite (x = i) (v x) (-(v x)) : by {
+      rw finset.sum_ite, rw finset.sum_const_zero, simp}
     ...                = v i - (v j) : by {rw finset.sum_ite, rw finset.filter_filter, rw finset.filter_filter, rw inside_eq₁, rw inside_eq₂ _ _ h, rw finset.sum_eq_single_of_mem i, rw finset.sum_eq_single_of_mem j, rw sub_eq_add_neg, simp,
       intros b h₁ h₂,
       simp at h₁,
