@@ -183,10 +183,35 @@ end
 lemma extend_Lb_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
   exists_subset_is_orthonormal_basis (hLb_still_on S L)
 
+noncomputable def f := S.subtype ∘ (onbasis S)
+
+lemma onbasis_injective : function.injective (onbasis S) :=
+begin
+  apply basis.injective,
+end
+
+lemma f_injective : function.injective (f S) :=
+begin
+  have h_sub_inj : function.injective ⇑(S.subtype) :=
+  begin
+    apply subtype.coe_injective,
+  end,
+  apply function.injective.comp h_sub_inj (onbasis_injective S),
+end
+
+noncomputable def g := L ∘ (onbasis S)
+
+lemma g_injective : function.injective (g S L) :=
+begin
+  simp only [g],
+  apply function.injective.comp,
+  apply linear_isometry.injective L,
+  exact onbasis_injective S,
+end
+
 lemma L_to_M : ∃ (M : (ℂ^n) →ₗᵢ[ℂ] (ℂ^n)), (∀ (s : S), M s = L s) :=
 begin
-  let f := S.subtype ∘ (onbasis S),
-  let v := set.range f,
+  let v := set.range (f S),
   have hb : ∃ (u : set ℂ^n) (H : u ⊇ v) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
     by apply extend_b_in_Cn S,
   cases hb with u hb,
@@ -194,8 +219,7 @@ begin
   cases hb with b_u hb,
   cases hb with hb_on hb_coe,
 
-  let g := L ∘ (onbasis S),
-  let Lv := set.range g,
+  let Lv := set.range (g S L),
   have hLb : ∃ (Mu : set ℂ^n) (H : Mu ⊇ Lv) (b : basis Mu ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
     by apply extend_Lb_in_Cn S L,
   cases hLb with Mu hLb,
@@ -203,31 +227,70 @@ begin
   cases hLb with b_Mu hLb,
   cases hLb with hLb_on hLb_coe,
 
-  have h_f : ∀ (x : (orthonormal_basis_index ℂ S)), (f x) ∈ u := sorry,
+  have h_f : ∀ (x : (orthonormal_basis_index ℂ S)), (f S x) ∈ u :=
+  begin
+    intro x,
+    apply set.mem_of_subset_of_mem h_uv,
+    apply set.mem_range_self,
+  end,
 
-  let f_to_u := set.cod_restrict f u h_f,
+  let f_to_u := set.cod_restrict (f S) u h_f,
 
   have fintype_u : fintype u := by apply finite_dimensional.fintype_basis_index b_u,
   have fintype_Mu : fintype Mu := by apply finite_dimensional.fintype_basis_index b_Mu,
   
-  have : @fintype.card u fintype_u = @fintype.card Mu fintype_Mu := sorry,
+  have : @fintype.card u fintype_u = @fintype.card Mu fintype_Mu :=
+  begin
+    rw ← @finite_dimensional.finrank_eq_card_basis _ _ _ _ _ _ fintype_u b_u,
+    rw ← @finite_dimensional.finrank_eq_card_basis _ _ _ _ _ _ fintype_Mu b_Mu,
+  end,
 
-  have fintype_v : fintype v := set.fintype_range f,
-  have fintype_Lv : fintype Lv := set.fintype_range g,
+  have fintype_v : fintype v := set.fintype_range (f S),
+  have fintype_Lv : fintype Lv := set.fintype_range (g S L),
 
-  have : @fintype.card v fintype_v = @fintype.card Lv fintype_Lv := sorry,
+  have h_cardv_S : @fintype.card v fintype_v = fintype.card (orthonormal_basis_index ℂ S) :=
+  begin
+    rw set.card_range_of_injective,
+    exact f_injective S,
+  end,
+
+  have h_cardLv_S : @fintype.card Lv fintype_Lv = fintype.card (orthonormal_basis_index ℂ S) :=
+  begin
+    rw set.card_range_of_injective,
+    exact g_injective S L,
+  end,
+
+  have : @fintype.card v fintype_v = @fintype.card Lv fintype_Lv :=
+  begin
+    rw h_cardv_S,
+    rw h_cardLv_S,
+  end,
 
   let vc := u.diff v,
   let Lvc := Mu.diff Lv,
 
-  have fintype_vc : fintype vc := sorry,
-  have fintype_Lvc : fintype Lvc := sorry,
+  have fintype_vc : fintype vc := 
+  begin
+    apply @set.fintype_subset _ u _ fintype_u _ _,
+    exact classical.dec_pred (λ (_x : ℂ^n), _x ∈ vc),
+    apply set.diff_subset,
+  end,
+
+  have fintype_Lvc : fintype Lvc := 
+  begin
+    apply @set.fintype_subset _ Mu _ fintype_Mu _ _,
+    exact classical.dec_pred (λ (_x : ℂ^n), _x ∈ Lvc),
+    apply set.diff_subset,
+  end,
 
   have h_card_vc : @fintype.card vc fintype_vc = @fintype.card Lvc fintype_Lvc := sorry,
 
-  rw fintype.card_eq at h_card_vc,
-
-  have h_e1 : ∃ (e1 : vc ≃ Lvc), true := exists_true_iff_nonempty.mpr h_card_vc,
+  have h_e1 : ∃ (e1 : vc ≃ Lvc), true :=
+  begin
+    rw exists_true_iff_nonempty,
+    rw ← @fintype.card_eq _ _ fintype_vc fintype_Lvc,
+    exact h_card_vc,
+  end,
 
   let e1 := classical.some h_e1,
 
@@ -235,13 +298,16 @@ begin
 
   have h_e2 : (function.bijective e2) := equiv.bijective e1,
 
-  have : Lvc ⊆ set.univ := set.subset_univ Lvc,
+  have h_Lvc_inc : Lvc ⊆ set.univ := set.subset_univ Lvc,
 
-  let e := (equiv.set.univ (ℂ^n)) ∘ (set.inclusion this) ∘ e2,
+  let e := (equiv.set.univ (ℂ^n)) ∘ (set.inclusion h_Lvc_inc) ∘ e2,
 
-  have h_e : (function.injective e) ∧ (set.range e = Lvc) :=
+  have h_e : (function.injective e) :=
   begin
-    sorry,
+    rw equiv.comp_injective,
+    apply function.injective.comp,
+    exact set.inclusion_injective h_Lvc_inc,
+    exact equiv.injective e1,
   end,
   
   have h_vc : vc ⊆ u := set.diff_subset u v,
@@ -261,7 +327,7 @@ begin
   e is an arbitrary bijection between u ∖ v and Mu ∖ Lv
   -/
 
-  let M1 := function.extend f_to_u g e',
+  let M1 := function.extend f_to_u (g S L) e',
 
   let M2 := (basis.constr b_u ℂ) M1,
 
