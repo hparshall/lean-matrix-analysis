@@ -3,6 +3,7 @@ import .ladr_7
 import .lemmas.ladr_7_lem
 import linear_algebra.basic
 import .gram
+import .isometry
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 variable {n : ℕ}
@@ -178,9 +179,28 @@ lemma lem_7_45_2 : ∃ S₁' : linear_isometry_equiv (ring_hom.id ℂ) (R).range
   end
 
 
-lemma lem_7_45 : ∃ (S : linear_isometry_equiv (ring_hom.id ℂ) (ℂ^n) (ℂ^n)), ∀ v : ℂ^n, (T v = S (R v)) :=
+lemma lem_7_45 : ∃ (S : linear_isometry (ring_hom.id ℂ) (ℂ^n) (ℂ^n)), ∀ v : ℂ^n, (T v = S (R v)) :=
 begin
-  sorry,
+  have key := lem_7_45_2 T,
+  let S₁ := classical.some key,
+  let hS₁ : ∀ v, (S₁ ((linear_map.range_restrict R) v): ℂ^n) = T v := classical.some_spec key,
+
+  let inclusion : (T.range) →ₗᵢ[ℂ]  (ℂ^n) := submodule.subtypeₗᵢ T.range,
+  let S' : ((R).range) →ₗᵢ[ℂ] (ℂ^n) := inclusion.comp (S₁.to_linear_isometry),
+
+  let M := classical.some (L_to_M (linear_map.range (R)) S'),
+  have hM : (∀ (s : linear_map.range (R)), M s = S' s) := classical.some_spec (L_to_M (linear_map.range (R)) S'),
+  use M,
+  intro v,
+  specialize hM ((R).range_restrict v),
+  simp only [submodule.subtype_apply,
+ linear_isometry_equiv.coe_to_linear_isometry,
+ linear_isometry.coe_comp,
+ function.comp_app,
+ linear_map.cod_restrict_apply,
+ submodule.coe_subtypeₗᵢ] at hM,
+ rw hM,
+ rw hS₁ v,
 end
 
 

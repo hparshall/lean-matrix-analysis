@@ -14,7 +14,7 @@ noncomputable def e_basis : (basis (fin n) ℂ (ℂ^n)) := (gram_sa T).eigenvect
 
 noncomputable def S := classical.some (lem_7_45 T)
 
-lemma lin_iso_equiv_preserves_onb (b : basis (fin n) ℂ ℂ^n) (h : orthonormal ℂ b) : orthonormal ℂ ((S T).to_linear_isometry ∘ b) :=
+lemma lin_iso_equiv_preserves_onb (b : basis (fin n) ℂ ℂ^n) (h : orthonormal ℂ b) : orthonormal ℂ ((S T) ∘ b) :=
 begin
   unfold orthonormal,
   split,
@@ -22,9 +22,9 @@ begin
   apply norm_sq_one_norm_eq_one,
   apply complex.of_real_injective,
   
-  calc ↑(∥(⇑((S T).to_linear_isometry) ∘ ⇑b) i∥ ^ 2) = (∥ ((S T).to_linear_isometry ∘ b) i ∥ : ℂ )^2 : by {simp only [complex.of_real_pow, linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, function.comp_app, linear_isometry_equiv.norm_map]}
-    ...              = ↑∥ (S T).to_linear_isometry (b i) ∥^2 : by {simp only [linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, function.comp_app, linear_isometry_equiv.norm_map]}
-    ...              = ⟪ (S T).to_linear_isometry (b i), (S T).to_linear_isometry (b i) ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
+  calc ↑(∥(⇑(S T) ∘ ⇑b) i∥ ^ 2) = (∥ ((S T) ∘ b) i ∥ : ℂ )^2 : by {simp only [complex.of_real_pow, linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, function.comp_app, linear_isometry_equiv.norm_map]}
+    ...              = ↑∥ (S T) (b i) ∥^2 : by {simp only [linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, function.comp_app, linear_isometry_equiv.norm_map]}
+    ...              = ⟪ (S T) (b i), (S T) (b i) ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
     ...              = ⟪ b i , b i ⟫_ℂ : by {rw linear_isometry.inner_map_map}
     ...              = (∥ b i ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K}
     ...              = ((1 : ℝ) : ℂ) : by {rw h.1 i, simp only [one_pow, complex.of_real_one, eq_self_iff_true]},
@@ -98,9 +98,9 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
 
     have hₛ : ∀ v : ℂ^n, (T v = (S T) (R v)) := classical.some_spec (lem_7_45 T),
 
-    let f' := (S T).to_linear_isometry ∘ b,
-    have hli : linear_independent ℂ f' := lin_ind ((S T).to_linear_isometry) b,
-    have hsp : submodule.span ℂ (set.range f') = ⊤ := span ((S T).to_linear_isometry) b,
+    let f' := (S T) ∘ b,
+    have hli : linear_independent ℂ f' := lin_ind ((S T)) b,
+    have hsp : submodule.span ℂ (set.range f') = ⊤ := span ((S T)) b,
     let f := basis.mk hli hsp,
 
     use b,
@@ -111,8 +111,8 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     split,
     exact hb,
 
-    have : orthonormal ℂ ((S T).to_linear_isometry ∘ b) := lin_iso_equiv_preserves_onb T b hb,
-    have f_def : (S T).to_linear_isometry ∘ b = f :=
+    have : orthonormal ℂ (S T ∘ b) := lin_iso_equiv_preserves_onb T b hb,
+    have f_def : (S T) ∘ b = f :=
     begin
       simp only [f],
       rw basis.coe_mk,
@@ -125,9 +125,15 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     have eq₂ : (S T) (R v) = ∑ (i : fin n), ⟪ (b i), v ⟫_ℂ • (S T) (R (b i)) :=
       begin
           calc (S T) (R v) = (S T) (∑ (i : fin n), ⟪ (b i), v ⟫_ℂ • R (b i)) : by {rw this}
-            ...        = (S T).to_linear_equiv.to_linear_map (∑ (i : fin n), ⟪ (b i), v ⟫_ℂ • R (b i)) : by {norm_cast}
+            ...        = (S T).to_linear_map (∑ (i : fin n), ⟪ (b i), v ⟫_ℂ • R (b i)) : by {norm_cast}
             ...        = ∑ (i : fin n), (S T) (⟪ (b i), v ⟫_ℂ • R (b i)) : by {rw linear_map.map_sum, norm_cast}
-            ...        = (∑ (i : fin n), ⟪ (b i), v ⟫_ℂ • (S T) (R (b i))) : by {simp only [is_R_or_C.inner_apply, linear_isometry_equiv.map_smul, inner_product_space.is_self_adjoint.apply_eigenvector_basis, pi_Lp.inner_apply, eq_self_iff_true, complex.coe_smul, finset.sum_congr]},
+            ...        = (∑ (i : fin n), ⟪ (b i), v ⟫_ℂ • (S T) (R (b i))) : by {simp only [is_R_or_C.inner_apply,
+ inner_product_space.is_self_adjoint.apply_eigenvector_basis,
+ pi_Lp.inner_apply,
+ eq_self_iff_true,
+ complex.coe_smul,
+ linear_isometry.map_smul,
+ finset.sum_congr]},
         end,
     rw ← hₛ at eq₂,
     rw eq₂,
@@ -135,9 +141,6 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     begin
       intro i,
       rw basis.mk_apply hli hsp i,
-      simp only [f'],
-      rw function.comp_app,
-      simp only [linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, linear_isometry_equiv.map_eq_iff],
     end,
     conv
     {
@@ -148,7 +151,7 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
       rw inner_product_space.is_self_adjoint.apply_eigenvector_basis R_is_sa,
       norm_cast,
       rw ← complex.coe_smul,
-      rw linear_isometry_equiv.map_smulₛₗ (S T),
+      rw linear_isometry.map_smul (S T),
       rw Sb_eq_f,
     },
     congr',
@@ -158,7 +161,7 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
       simp only [complex.of_real_inj, ring_hom.id_apply],
       unfold singular_values,
     end,
-    rw eq₃,
     simp only [is_R_or_C.inner_apply, basis.coe_mk, complex.coe_smul, finset.sum_congr],
     rw smul_comm,
+    simp only [singular_values],
   end
