@@ -183,7 +183,7 @@ end
 lemma extend_Lb_in_Cn : ∃ (u : set ℂ^n) (H : u ⊇ set.range (L ∘ onbasis S)) (b : basis u ℂ ℂ^n), orthonormal ℂ b ∧ ⇑b = coe :=
   exists_subset_is_orthonormal_basis (hLb_still_on S L)
 
-lemma L_to_M : ∃ (M : (ℂ^n) →ₗ[ℂ] (ℂ^n)), (∀ (s : S), M s = L s) ∧ (isometry M) :=
+lemma L_to_M : ∃ (M : (ℂ^n) →ₗᵢ[ℂ] (ℂ^n)), (∀ (s : S), M s = L s) :=
 begin
   let f := S.subtype ∘ (onbasis S),
   let v := set.range f,
@@ -263,10 +263,16 @@ begin
 
   let M1 := function.extend f_to_u g e',
 
-  let M := (basis.constr b_u ℂ) M1,
+  let M2 := (basis.constr b_u ℂ) M1,
+
+  have h_Mb_on : orthonormal ℂ (⇑M2 ∘ ⇑b_u) := sorry,
+
+  let M := M2.isometry_of_orthonormal hb_on h_Mb_on,
   use M,
-  split,
   intro s,
-  rw basis.constr_apply,
+  simp only [M],
+  rw linear_map.coe_isometry_of_orthonormal,
+  rw @basis.constr_apply_fintype _ _ _ _ _ _ _ _ _ fintype_u b_u ℂ _ _ _ M1 s,
+  rw basis.equiv_fun_apply,
   sorry,
 end
