@@ -14,7 +14,7 @@ noncomputable def e_basis : (basis (fin n) ℂ (ℂ^n)) := (gram_sa T).eigenvect
 
 noncomputable def S := classical.some (lem_7_45 T)
 
-lemma lin_iso_equiv_preserves_onb (b : basis (fin n) ℂ ℂ^n) (h : orthonormal ℂ b) : orthonormal ℂ ((S T) ∘ b) :=
+lemma lin_iso_preserves_onb' (b : basis (fin n) ℂ ℂ^n) (h : orthonormal ℂ b) : orthonormal ℂ ((S T) ∘ b) :=
 begin
   unfold orthonormal,
   split,
@@ -111,7 +111,7 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     split,
     exact hb,
 
-    have : orthonormal ℂ (S T ∘ b) := lin_iso_equiv_preserves_onb T b hb,
+    have : orthonormal ℂ (S T ∘ b) := lin_iso_preserves_onb' T b hb,
     have f_def : (S T) ∘ b = f :=
     begin
       simp only [f],

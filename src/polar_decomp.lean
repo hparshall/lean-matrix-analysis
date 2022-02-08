@@ -3,7 +3,7 @@ import .ladr_7
 import .lemmas.ladr_7_lem
 import linear_algebra.basic
 import .gram
-import .isometry
+import .isometry_extend
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 variable {n : ℕ}
@@ -188,8 +188,8 @@ begin
   let inclusion : (T.range) →ₗᵢ[ℂ]  (ℂ^n) := submodule.subtypeₗᵢ T.range,
   let S' : ((R).range) →ₗᵢ[ℂ] (ℂ^n) := inclusion.comp (S₁.to_linear_isometry),
 
-  let M := classical.some (L_to_M (linear_map.range (R)) S'),
-  have hM : (∀ (s : linear_map.range (R)), M s = S' s) := classical.some_spec (L_to_M (linear_map.range (R)) S'),
+  let M := classical.some (isometry_extend (linear_map.range (R)) S'),
+  have hM : (∀ (s : linear_map.range (R)), M s = S' s) := classical.some_spec (isometry_extend (linear_map.range (R)) S'),
   use M,
   intro v,
   specialize hM ((R).range_restrict v),

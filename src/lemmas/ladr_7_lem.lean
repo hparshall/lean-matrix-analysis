@@ -106,3 +106,23 @@ begin
   exact zero_le_one,
   exact norm_nonneg v,
 end
+
+
+lemma lin_iso_preserves_on {ι : Type} {S : submodule ℂ ℂ^n} (b : ι → S ) (h : orthonormal ℂ b) (L : S →ₗᵢ[ℂ] ℂ^n) : orthonormal ℂ (L ∘ b) :=
+begin
+  unfold orthonormal,
+  split,
+  intro i,
+  apply norm_sq_one_norm_eq_one,
+  apply complex.of_real_injective,
+  
+  calc ↑(∥(L ∘ b) i∥ ^ 2) = (∥ (L ∘ b) i ∥ : ℂ )^2 : by {simp only [complex.of_real_pow, linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, function.comp_app, linear_isometry_equiv.norm_map]}
+    ...              = ↑∥ L (b i) ∥^2 : by {simp only [linear_isometry_equiv.coe_to_linear_isometry, eq_self_iff_true, function.comp_app, linear_isometry_equiv.norm_map]}
+    ...              = ⟪ L (b i), L (b i) ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
+    ...              = ⟪ b i , b i ⟫_ℂ : by {rw linear_isometry.inner_map_map}
+    ...              = (∥ b i ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K}
+    ...              = ((1 : ℝ) : ℂ) : by {rw h.1 i, simp only [one_pow, complex.of_real_one, eq_self_iff_true]},
+  intros i j hij,
+  rw linear_isometry.inner_map_map,
+  exact h.2 hij,
+end
