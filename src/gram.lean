@@ -1,11 +1,17 @@
 import .ladr_7_35
+/-
+uses is_positive, thm_7_35_b_c
+-/
+
 
 variables {n : ℕ} (T : Lℂ^n)
 
 open_locale big_operators complex_conjugate matrix
 
+localized "postfix `†`:1000 := linear_map.adjoint" in src
+
 lemma gram_sa :
-  is_sa (T.adjoint * T) :=
+  inner_product_space.is_self_adjoint (T† * T) :=
 begin
   intros x y,
   rw ← linear_map.adjoint_inner_right,
@@ -14,11 +20,11 @@ begin
 end
 
 lemma gram_pos :
-  is_positive (T.adjoint * T) :=
+  is_positive (T† * T) :=
 begin
   rw is_positive,
   intro x,
-  have h1 : ⟪ (T.adjoint * T) x, x ⟫_ℂ = ⟪ (linear_map.adjoint T) (T x), x ⟫_ℂ :=
+  have h1 : ⟪ (T† * T) x, x ⟫_ℂ = ⟪ (T†) (T x), x ⟫_ℂ :=
   begin
     rw linear_map.mul_apply,
   end,
@@ -34,9 +40,9 @@ begin
 end
 
 lemma sqrt_gram :
-  ∃ (R : Lℂ^n), (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) :=
+  ∃ (R : Lℂ^n), (R^2 = T† * T) ∧ (inner_product_space.is_self_adjoint R) ∧ (is_positive R) :=
 begin
-  have hg : is_sa (T.adjoint * T) := by exact gram_sa T,
+  have hg : inner_product_space.is_self_adjoint (T† * T) := by exact gram_sa T,
   apply thm_7_35_b_c,
   exact hg,
   apply gram_pos,

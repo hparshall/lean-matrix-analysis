@@ -3,7 +3,10 @@ The goal of this file is to prove that every positive, self-adjoint linear opera
 on ℂ^n has a positive, self-adjoint square root.
 -/
 
-import .lemmas.ladr_7_lem
+
+/-
+uses lem_7_15
+-/
 import .ladr_7
 import .orthonormal_basis
 
