@@ -86,8 +86,8 @@ begin
   simp only [linear_isometry.coe_to_linear_map, this],
 end
 
-theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
-    (orthonormal ℂ e ∧ orthonormal ℂ f) ∧ T v = ∑ (i : (fin n)), singular_values T i • ⟪e i, v ⟫_ℂ • (f i) :=
+theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), 
+    (orthonormal ℂ e ∧ orthonormal ℂ f) ∧ ∀ v : ℂ^n, T v = ∑ (i : (fin n)), singular_values T i • ⟪e i, v ⟫_ℂ • (f i) :=
   begin
     have R_is_sa := R_sa T,
     let b := inner_product_space.is_self_adjoint.eigenvector_basis R_is_sa h_fin,
@@ -103,7 +103,6 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     use b,
     use f,
 
-    intro v,
     split,
     split,
     exact hb,
@@ -116,6 +115,8 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     end,
     rw ← f_def,
     exact this,
+    
+    intro v,
 
     have : R v = ∑ (i : (fin n)), ⟪ (b i), v ⟫_ℂ • (R (b i)) := R_v_sum T v R_is_sa _,
 
