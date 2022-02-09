@@ -1,11 +1,8 @@
-import analysis.inner_product_space.basic
 import analysis.inner_product_space.pi_L2
-import analysis.inner_product_space.spectrum
-import analysis.normed_space.pi_Lp
-import linear_algebra.basis
-import .lemmas.ladr_7_lem
 
-open_locale big_operators complex_conjugate matrix
+notation `ℂ^` n := euclidean_space ℂ (fin n)
+
+open_locale big_operators
 
 variables {n : ℕ} (b : basis (fin n) ℂ ℂ^n) (v : ℂ^n) (hon : orthonormal ℂ b)
 
@@ -14,7 +11,7 @@ lemma onb_coords_eq_inner (i : fin n) (hon : orthonormal ℂ b) :
 begin
   rw orthonormal_iff_ite at hon,
   specialize hon i,
-  conv -- To get past binders (functions, qualifiers etc.)
+  conv
   begin
     to_rhs,
     rw ← b.sum_repr v,

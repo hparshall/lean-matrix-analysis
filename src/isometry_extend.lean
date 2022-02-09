@@ -1,6 +1,12 @@
-import .lemmas.ladr_7_lem
+/-
+The goal of this file is to prove the following.  If S ⊆ ℂ^n is a subspace and L : S → V is
+an isometry, then there exists an isometry M : ℂ^n → ℂ^n such that M(s) = L(s) for every s ∈ S.
+-/
 
-open_locale big_operators complex_conjugate matrix
+import analysis.inner_product_space.pi_L2
+open_locale complex_conjugate
+
+notation `ℂ^` n := euclidean_space ℂ (fin n)
 
 variables {n : ℕ} (S : submodule ℂ (ℂ^n)) (L : S →ₗᵢ[ℂ] ℂ^n)
 
@@ -152,14 +158,14 @@ begin
     begin
       simp only [M],
       simp only [linear_isometry.coe_to_linear_map,
- continuous_linear_map.to_linear_map_eq_coe,
- add_left_inj,
- eq_self_iff_true,
- function.comp_app,
- linear_map.coe_comp,
- linear_isometry.map_eq_iff,
- continuous_linear_map.coe_coe,
- linear_map.add_apply],
+        continuous_linear_map.to_linear_map_eq_coe,
+        add_left_inj,
+        eq_self_iff_true,
+        function.comp_app,
+        linear_map.coe_comp,
+        linear_isometry.map_eq_iff,
+        continuous_linear_map.coe_coe,
+        linear_map.add_apply],
     end,
     rw this,
     conv
@@ -168,7 +174,6 @@ begin
       rw x_decomp,
     end,
     rw norm_of_sum_perp S ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
-
     rw @norm_split_L_L' _ S L ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
     simp only [linear_isometry.norm_map, add_left_inj, eq_self_iff_true, sq_eq_sq],
   end,

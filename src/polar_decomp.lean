@@ -1,7 +1,3 @@
-import .ladr_7_35
-import .ladr_7
-import .lemmas.ladr_7_lem
-import linear_algebra.basic
 import .gram
 import .isometry_extend
 

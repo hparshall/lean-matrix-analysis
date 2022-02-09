@@ -1,6 +1,5 @@
 import .gram
 import .polar_decomp
-import lemmas.ladr_7_lem
 
 open_locale big_operators complex_conjugate matrix
 

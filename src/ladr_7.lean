@@ -1,8 +1,3 @@
-import analysis.inner_product_space.adjoint
-import analysis.inner_product_space.basic
-import analysis.inner_product_space.pi_L2
-import analysis.inner_product_space.spectrum
-import analysis.normed_space.pi_Lp
 import .lemmas.ladr_7_lem
 
 variable {n : ℕ}
