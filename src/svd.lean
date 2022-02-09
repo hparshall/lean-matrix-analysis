@@ -87,8 +87,6 @@ begin
   simp only [linear_isometry.coe_to_linear_map, this],
 end
 
-#check inner_product_space.is_self_adjoint.diagonalization (gram_sa T)
-
 theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n), ∀ v : ℂ^n,
     (orthonormal ℂ e ∧ orthonormal ℂ f) ∧ T v = ∑ (i : (fin n)), singular_values T i • ⟪e i, v ⟫_ℂ • (f i) :=
   begin
