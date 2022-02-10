@@ -61,6 +61,7 @@ begin
   rw identity_one,
 end
 
+
 lemma inner_eq_zero_iff_zero (T : Lℂ^n)
   (h : ∀ v : ℂ^n, ⟪T v, v⟫_ℂ = 0) : T = 0 :=
 begin
@@ -74,18 +75,14 @@ begin
   apply linear_map.ext,
   intro x,
   specialize this x,
-  have : T x = 0,
-  begin
-    apply inner_with_all_eq_zero_eq_zero,
-    intro u,
-    calc ⟪u, (T x)⟫_ℂ = conj ⟪(T x), u⟫_ℂ : by {rw ← inner_conj_sym}
-    ...                = (1 / 4) * (4 * conj ⟪(T x), u⟫_ℂ ) : by {ring}
-    ...                = (1 / 4) * conj (4 * ⟪(T x), u⟫_ℂ ) : by {simp}
-    ...                = (1 / 4) * conj 0 : by {rw this u}
-    ...                = 0 : by {simp},
-  end,
-  rw this,
-  simp,
+  simp only [linear_map.zero_apply],
+  specialize this (T x),
+  simp only [false_or,
+    bit0_eq_zero,
+    one_ne_zero,
+    mul_eq_zero] at this,
+  rw inner_self_eq_zero at this,
+  exact this,
 end
 
 lemma inner_sub_eq_inner_sub_adjoint (T : Lℂ^n)
