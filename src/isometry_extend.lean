@@ -18,12 +18,18 @@ lemma euclidean_codim : finite_dimensional.finrank ℂ (ℂ^(codim S)) = codim S
 
 lemma Sperp_dim : finite_dimensional.finrank ℂ Sᗮ = codim S := by rw codim
 
+/-
+We have an isometry from Sᗮ to the appropriate Euclidean space.
+-/
 lemma L1_to_euclidean : ∃ (L1 : (Sᗮ →ₗᵢ[ℂ] ℂ^(codim S))), true :=
 begin
   let L1 := linear_isometry_equiv.of_inner_product_space (Sperp_dim S),
   use L1.to_linear_isometry,
 end
 
+/-
+The dimension of the image L(S) is equal to the dimension of S.
+-/
 lemma LS_dim : finite_dimensional.finrank ℂ (image_of S L) = finite_dimensional.finrank ℂ S :=
 begin
   have equiv_of_image := linear_equiv.of_injective (L.to_linear_map) L.injective,
@@ -39,6 +45,9 @@ begin
   rw image_of,
 end 
 
+/-
+The orthogonal complement L(S)ᗮ has dimension equal to codim S.
+-/
 lemma LSperp_dim : finite_dimensional.finrank ℂ (image_of S L)ᗮ = codim S :=
 begin
   have fact₁ := submodule.finrank_add_finrank_orthogonal (image_of S L),
@@ -51,12 +60,18 @@ begin
   exact this,
 end 
 
+/-
+We have an isometry from L(S)ᗮ to the appropriate Euclidean space.
+-/
 lemma L2_to_euclidean : ∃ (L2 : ((image_of S L)ᗮ ≃ₗᵢ[ℂ] ℂ^(codim S))), true :=
 begin
   let L2 := linear_isometry_equiv.of_inner_product_space (LSperp_dim S L),
   use L2,
 end
 
+/-
+We have an isometry between Sᗮ and L(S)ᗮ by mapping through Euclidean space.
+-/
 lemma complementary_isometry : ∃ (L' : (Sᗮ →ₗᵢ[ℂ] (image_of S L)ᗮ)), true :=
 begin
   let L1 := (L1_to_euclidean S).some,
@@ -64,38 +79,18 @@ begin
   use (L2.comp L1),
 end
 
+/-
+The projection of s ∈ S onto Sᗮ is zero.
+-/
 lemma orth_proj_perp_eq_zero (x : S) : (orthogonal_projection Sᗮ) ↑x = 0 :=
 begin
   have : ↑x ∈ S := submodule.coe_mem x,
   exact orthogonal_projection_mem_subspace_orthogonal_precomplement_eq_zero this,
 end
 
-lemma orth_perp_proj_eq_zero (y : Sᗮ) : (orthogonal_projection Sᗮᗮ) ↑y = 0 :=
-begin
-  have : ↑y ∈ Sᗮ := submodule.coe_mem y,
-  exact orthogonal_projection_mem_subspace_orthogonal_precomplement_eq_zero this,
-end
-
-lemma S_perp_perp : Sᗮᗮ = S :=
-begin
-  exact submodule.orthogonal_orthogonal S,
-end
-
-lemma norm_of_sum_perp (x : S) (y : Sᗮ) : ∥ (↑x : ℂ^n) + ↑y ∥^2 = ∥ x ∥^2 + ∥ y ∥^2 :=
-begin
-  rw sq,
-  rw orthogonal_projection_fn_norm_sq Sᗮ (↑x + y),
-  simp only [map_add,
- add_sub_add_left_eq_sub,
- submodule.subtype_apply,
- orthogonal_projection_fn_eq,
- submodule.coe_add,
- orthogonal_projection_mem_subspace_eq_self],
-  rw orth_proj_perp_eq_zero,
-  simp only [submodule.norm_coe, add_sub_cancel, zero_add, submodule.coe_zero],
-  rw [sq, sq],
-end
-
+/-
+There should be an applicable version of Pythagoras in mathlib.
+-/
 lemma norm_of_sum_perp' (x y : ℂ^n) (hx : x ∈ S) (hy : y ∈ Sᗮ) : ∥ x + y ∥^2 = ∥ x ∥^2 + ∥ y ∥^2 :=
 begin
   have xy_perp : ⟪x , y⟫_ℂ = 0 :=
@@ -173,9 +168,12 @@ begin
       to_rhs,
       rw x_decomp,
     end,
-    rw norm_of_sum_perp S ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
+    rw norm_of_sum_perp' S ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
     rw @norm_split_L_L' _ S L ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
     simp only [linear_isometry.norm_map, add_left_inj, eq_self_iff_true, sq_eq_sq],
+    simp only [add_left_inj, eq_self_iff_true, sq_eq_sq, submodule.coe_norm],
+    simp only [submodule.coe_mem],
+    simp only [submodule.coe_mem],
   end,
   rw sq_eq_sq at this,
   exact this,
