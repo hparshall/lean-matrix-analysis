@@ -130,7 +130,7 @@ end
 lemma lem_bc_2 (hpos : is_positive T) :
   is_sa (sqrt T hsa) :=
 begin
-  rw self_adjoint_iff,
+  rw self_adjoint_iff_eq_adjoint,
   rw linear_map.eq_adjoint_iff_basis (e_vecs T hsa) (e_vecs T hsa),
   intros i j,
   rw lem_bc_0,
@@ -180,7 +180,7 @@ begin
     apply lem_bc_2,
     exact hpos,
   end,
-  rw self_adjoint_iff at hsqrt,
+  rw self_adjoint_iff_eq_adjoint at hsqrt,
   rw linear_map.eq_adjoint_iff at hsqrt,
   specialize hsqrt ((e_vecs T hsa) i) x,
   rw ← hsqrt,

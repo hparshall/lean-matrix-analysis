@@ -24,10 +24,7 @@ lemma gram_pos :
 begin
   rw is_positive,
   intro x,
-  have h1 : ⟪ (T† * T) x, x ⟫_ℂ = ⟪ (T†) (T x), x ⟫_ℂ :=
-  begin
-    rw linear_map.mul_apply,
-  end,
+  have h1 : ⟪ (T† * T) x, x ⟫_ℂ = ⟪ (T†) (T x), x ⟫_ℂ := by rw linear_map.mul_apply,
   rw h1,
   rw linear_map.adjoint_inner_left,
   rw ← is_R_or_C.re_to_complex,

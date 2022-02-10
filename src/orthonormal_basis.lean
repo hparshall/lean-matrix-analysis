@@ -6,6 +6,9 @@ open_locale big_operators
 
 variables {n : ℕ} (b : basis (fin n) ℂ ℂ^n) (v : ℂ^n) (hon : orthonormal ℂ b)
 
+/-
+Basis coordinates are given by the inner product.
+-/
 lemma onb_coords_eq_inner (i : fin n) (hon : orthonormal ℂ b) :
   (b.repr v) i = ⟪ b i, v ⟫_ℂ :=
 begin
@@ -30,6 +33,9 @@ begin
   simp only [finset.mem_univ, if_true, eq_self_iff_true, finset.sum_singleton, finset.sum_congr],
 end
 
+/-
+Basis coordinates are given by the inner product.
+-/
 lemma onb_sum_repr (hon : orthonormal ℂ b):
   v = ∑ (i : (fin n)), ⟪b i, v⟫_ℂ • (b i) :=
 begin
