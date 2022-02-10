@@ -89,31 +89,12 @@ begin
 end
 
 /-
-There should be an applicable version of Pythagoras in mathlib.
+The Pythagorean theorem, applied to members of S and Sᗮ.
 -/
 lemma norm_of_sum_perp' (x y : ℂ^n) (hx : x ∈ S) (hy : y ∈ Sᗮ) : ∥ x + y ∥^2 = ∥ x ∥^2 + ∥ y ∥^2 :=
 begin
-  have xy_perp : ⟪x , y⟫_ℂ = 0 :=
-  begin
-    calc ⟪ x, y ⟫_ℂ = ⟪ x - 0 , y ⟫_ℂ : by {congr, simp only [eq_self_iff_true, sub_zero]}
-    ...             = ⟪ x - ((orthogonal_projection Sᗮ) x) , y ⟫_ℂ : by {congr, rw orthogonal_projection_mem_subspace_orthogonal_precomplement_eq_zero hx, norm_cast}
-    ...             = 0 : orthogonal_projection_inner_eq_zero x y hy,
-  end,
-  have yx_perp : ⟪ y , x ⟫_ℂ = 0 :=
-  begin
-    calc ⟪ y, x ⟫_ℂ = conj ⟪ x, y⟫_ℂ : by {rw inner_product_space.conj_sym}
-    ...             = conj 0 : by {rw xy_perp}
-    ...             = 0 : by {simp only [eq_self_iff_true, map_zero]},
-  end,
-  have : (∥ x + y ∥^2 : ℂ) = ∥ x ∥^2 + ∥ y ∥^2 :=
-  begin
-  calc (∥ x + y ∥^2 : ℂ) = ⟪ x + y , x + y ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
-  ...              = ⟪ x , x ⟫_ℂ + ⟪ x , y ⟫_ℂ + ⟪ y , x ⟫_ℂ + ⟪ y , y ⟫_ℂ : by {rw inner_add_add_self}
-  ...              = ⟪ x , x ⟫_ℂ + ⟪ y , y ⟫_ℂ : by {rw xy_perp, rw yx_perp, ring}
-  ...              = ∥ x ∥^2 + ∥ y ∥^2 : by {rw [← inner_self_eq_norm_sq_to_K, ← inner_self_eq_norm_sq_to_K]},
-  end,
-  rw ← complex.of_real_inj,
-  simp [this],
+  iterate {rw sq},  
+  apply norm_add_sq_eq_norm_sq_add_norm_sq_of_inner_eq_zero x y (submodule.inner_right_of_mem_orthogonal hx hy),
 end
 
 
@@ -171,7 +152,7 @@ begin
     rw norm_of_sum_perp' S ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
     rw @norm_split_L_L' _ S L ((orthogonal_projection S) x) ((orthogonal_projection Sᗮ) x),
     simp only [linear_isometry.norm_map, add_left_inj, eq_self_iff_true, sq_eq_sq],
-    simp only [add_left_inj, eq_self_iff_true, sq_eq_sq, submodule.coe_norm],
+    simp only [submodule.norm_coe, add_left_inj, eq_self_iff_true, sq_eq_sq],
     simp only [submodule.coe_mem],
     simp only [submodule.coe_mem],
   end,
