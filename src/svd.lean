@@ -115,7 +115,7 @@ theorem svd (T : Lℂ^n) : ∃ e f : basis (fin n) ℂ (ℂ^n),
     end,
     rw ← f_def,
     exact this,
-    
+
     intro v,
 
     have : R v = ∑ (i : (fin n)), ⟪ (b i), v ⟫_ℂ • (R (b i)) := R_v_sum T v R_is_sa _,
