@@ -3,6 +3,8 @@ The goal of this file is to prove that every positive, self-adjoint linear opera
 on ℂ^n has a positive, self-adjoint square root.
 -/
 
+-- Checked over by:
+-- Dan
 
 /-
 uses lem_7_15
@@ -34,11 +36,10 @@ lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := finrank_euclidean_space
 local notation `ev` := hsa.eigenvalues hn
 local notation `ew` := hsa.eigenvector_basis hn
 
-noncomputable def scaled_e_vecs : (fin n) → ℂ^n :=
-  λ (i : (fin n)), (real.sqrt(((ev) i)) : ℂ) • ((ew) i)
+local notation `sqrt_ew` := λ (i : (fin n)), (real.sqrt(((ev) i)) : ℂ) • ((ew) i)
 
 noncomputable def sqrt : Lℂ^n :=
-  @basis.constr (fin n) ℂ (ℂ^n) (ℂ^n) _ _ _ _ _ (ew) ℂ _ _ _ (scaled_e_vecs T hsa)
+  @basis.constr (fin n) ℂ (ℂ^n) (ℂ^n) _ _ _ _ _ (ew) ℂ _ _ _ (sqrt_ew)
 
 local notation `R` := (sqrt T) hsa
 
@@ -47,7 +48,7 @@ local notation `R` := (sqrt T) hsa
 T is positive, and so its eigenvalues are nonnegative.
 -/
 
-theorem thm_7_35_a_b (hpos : is_positive T):
+theorem eig_nonneg_of_pos (hpos : is_positive T):
   (∀ i : (fin n), 0 ≤ ((ev) i)) :=
   begin
     intro i,
@@ -62,27 +63,26 @@ theorem thm_7_35_a_b (hpos : is_positive T):
 By definition, √T has the same eigenvectors as T, with sqrt eigenvalues.
 -/
 
-lemma lem_bc_0 (i : fin n):
+lemma sqrt_apply (i : fin n):
   R ((ew) i) = (real.sqrt ((ev) i) : ℂ) • ((ew) i) :=
 begin
   rw sqrt,
   rw (ew).constr_basis,
-  rw scaled_e_vecs,
 end
 
 /-
 We have √T^2 = T.
 -/
 
-lemma lem_bc_1 (hpos : is_positive T):
+lemma sqrt_sq (hpos : is_positive T):
   ((sqrt T hsa) * (sqrt T hsa)) = T :=
   begin
     apply basis.ext ew,
     intro i,
     calc (R * R) (ew i) = R (R (ew i)) : by {rw linear_map.mul_apply}
-    ...                 = R (↑(real.sqrt(ev i)) • (ew i)) : by {rw lem_bc_0}
+    ...                 = R (↑(real.sqrt(ev i)) • (ew i)) : by {rw sqrt_apply}
     ...                 = real.sqrt(ev i) • R ((ew i)) : by {rw linear_map.map_smul, norm_cast}
-    ...                 = (ev i) • (ew i) : by {rw lem_bc_0, norm_cast, rw smul_smul, rw real.mul_self_sqrt, exact thm_7_35_a_b T hsa hpos i}
+    ...                 = (ev i) • (ew i) : by {rw sqrt_apply, norm_cast, rw smul_smul, rw real.mul_self_sqrt, exact eig_nonneg_of_pos T hsa hpos i}
     ...                 = T (ew i) : by {rw inner_product_space.is_self_adjoint.apply_eigenvector_basis, norm_cast}
   end
 
@@ -90,18 +90,18 @@ lemma lem_bc_1 (hpos : is_positive T):
 √T is self-adjoint.
 -/
 
-lemma lem_bc_2 (hpos : is_positive T) :
+lemma sqrt_is_sa (hpos : is_positive T) :
   is_sa R :=
   begin
     rw [self_adjoint_iff_eq_adjoint, linear_map.eq_adjoint_iff_basis (ew) (ew)],
     intros i j,
     by_cases h : (i = j),
     iterate {rw ← h},
-    calc ⟪ R ((ew) i), (ew) i ⟫_ℂ = real.sqrt((ev) i) • ⟪ (ew) i, (ew) i ⟫_ℂ : by {rw lem_bc_0, rw [inner_smul_left, complex.conj_of_real, complex.real_smul]}
-      ...                         = ⟪ (ew) i, R ((ew) i) ⟫_ℂ : by {rw lem_bc_0, rw [inner_smul_right, complex.real_smul]},
+    calc ⟪ R ((ew) i), (ew) i ⟫_ℂ = real.sqrt((ev) i) • ⟪ (ew) i, (ew) i ⟫_ℂ : by {rw sqrt_apply, rw [inner_smul_left, complex.conj_of_real, complex.real_smul]}
+      ...                         = ⟪ (ew) i, R ((ew) i) ⟫_ℂ : by {rw sqrt_apply, rw [inner_smul_right, complex.real_smul]},
 
-    calc ⟪ R ((ew) i), (ew) j ⟫_ℂ = real.sqrt((ev) i) • ⟪ (ew) i, (ew) j ⟫_ℂ : by {rw lem_bc_0, rw [inner_smul_left, complex.conj_of_real, complex.real_smul]}
-      ...                         = ⟪ (ew) i, R ((ew) j) ⟫_ℂ : by {rw lem_bc_0, rw [inner_smul_right, complex.real_smul, (hsa.eigenvector_basis_orthonormal hn).2 h, mul_zero, mul_zero]},
+    calc ⟪ R ((ew) i), (ew) j ⟫_ℂ = real.sqrt((ev) i) • ⟪ (ew) i, (ew) j ⟫_ℂ : by {rw sqrt_apply, rw [inner_smul_left, complex.conj_of_real, complex.real_smul]}
+      ...                         = ⟪ (ew) i, R ((ew) j) ⟫_ℂ : by {rw sqrt_apply, rw [inner_smul_right, complex.real_smul, (hsa.eigenvector_basis_orthonormal hn).2 h, mul_zero, mul_zero]},
   end
 
 
@@ -113,8 +113,8 @@ lemma sqrt_repr (x : ℂ^n) (i : fin n) (hpos : is_positive T):
   (ew).repr (R x) i = (real.sqrt((ev) i)) • ((ew).repr x i) :=
 begin
   calc (ew).repr(R x) i = ⟪ (ew) i, R x ⟫_ℂ : onb_coords_eq_inner _ _ _ (inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal hsa hn)
-    ...                 = ⟪ R ((ew) i) , x ⟫_ℂ : (lem_bc_2 T hsa hpos ((ew) i) x).symm
-    ...                 = (real.sqrt((ev) i)) • ⟪ (ew) i , x ⟫_ℂ : by {rw [lem_bc_0, inner_smul_left, is_R_or_C.conj_of_real, complex.real_smul]}
+    ...                 = ⟪ R ((ew) i) , x ⟫_ℂ : (sqrt_is_sa T hsa hpos ((ew) i) x).symm
+    ...                 = (real.sqrt((ev) i)) • ⟪ (ew) i , x ⟫_ℂ : by {rw [sqrt_apply, inner_smul_left, is_R_or_C.conj_of_real, complex.real_smul]}
     ...                 = (real.sqrt((ev) i)) • ((ew).repr x i) : by {rw ← onb_coords_eq_inner (ew) _ _ (inner_product_space.is_self_adjoint.eigenvector_basis_orthonormal hsa hn)},
 end
 
@@ -122,7 +122,7 @@ end
 √T is positive, real part.
 -/
 
-lemma lem_bc_3a (hpos : is_positive T) (x : ℂ^n) :
+lemma sqrt_is_positive' (hpos : is_positive T) (x : ℂ^n) :
   ⟪ (sqrt T hsa) x, x ⟫_ℂ.re ≥ 0 :=
   begin
     rw [← basis.sum_repr (ew) (R x), sum_inner, ← complex.coe_re_add_group_hom, add_monoid_hom.map_sum complex.re_add_group_hom],
@@ -137,17 +137,17 @@ lemma lem_bc_3a (hpos : is_positive T) (x : ℂ^n) :
 √T is positive.
 -/
 
-lemma lem_bc_3 (hpos : is_positive T) :
+lemma sqrt_is_positive (hpos : is_positive T) :
   is_positive (sqrt T hsa) :=
 begin
   intro x,
-  exact ⟨lem_bc_3a T hsa hpos x, complex.eq_conj_iff_im.1 ((lem_7_15 R).1 (lem_bc_2 T hsa hpos) x)⟩,
+  exact ⟨sqrt_is_positive' T hsa hpos x, complex.eq_conj_iff_im.1 ((lem_7_15 R).1 (sqrt_is_sa T hsa hpos) x)⟩,
 end
 
 
 /-
 A positive, self-adjoint linear operator T : ℂ^n → ℂ^n has a positive, self-adjoint square root.
 -/
-theorem thm_7_35_b_c (hsa : is_sa T) (hpos : is_positive T):
+theorem sqrt_exists (hsa : is_sa T) (hpos : is_positive T):
   ∃ (R' : Lℂ^n), ((R' * R') = T) ∧ (is_sa R') ∧ (is_positive R') :=
-    Exists.intro (sqrt T hsa) (id ⟨lem_bc_1 T hsa hpos, ⟨lem_bc_2 T hsa hpos, lem_bc_3 T hsa hpos⟩⟩)
+    Exists.intro (sqrt T hsa) (id ⟨sqrt_sq T hsa hpos, ⟨sqrt_is_sa T hsa hpos, sqrt_is_positive T hsa hpos⟩⟩)
