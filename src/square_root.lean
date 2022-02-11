@@ -66,8 +66,7 @@ By definition, √T has the same eigenvectors as T, with sqrt eigenvalues.
 lemma sqrt_apply (i : fin n):
   R ((ew) i) = (real.sqrt ((ev) i) : ℂ) • ((ew) i) :=
 begin
-  rw sqrt,
-  rw (ew).constr_basis,
+  rw [sqrt, (ew).constr_basis],
 end
 
 /-
