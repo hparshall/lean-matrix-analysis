@@ -3,6 +3,10 @@ The goal of this file is to prove the following.  If S ⊆ ℂ^n is a subspace a
 an isometry, then there exists an isometry M : ℂ^n → ℂ^n such that M(s) = L(s) for every s ∈ S.
 -/
 
+/-
+Checked by: Hans
+-/
+
 import analysis.inner_product_space.pi_L2
 open_locale complex_conjugate
 
@@ -60,7 +64,7 @@ begin
 end
 
 /-
-We have an isometry between Sᗮ and L(S)ᗮ by mapping through Euclidean space.
+We have an isometry L' between Sᗮ and L(S)ᗮ by mapping through Euclidean space.
 -/
 lemma complementary_isometry : ∃ (L' : (Sᗮ →ₗᵢ[ℂ] (range L)ᗮ)), true :=
 begin
@@ -70,7 +74,15 @@ begin
   use (L2.comp L1),
 end
 
+
 noncomputable def L' := (range L)ᗮ.subtypeₗᵢ.comp (complementary_isometry S L).some
+
+/-
+We build a linear map on ℂ^n by projecting and applying our isometries.
+-/
+
+local notation `extend ` L := 
+  L.to_linear_map.comp (proj S).to_linear_map + (L' S L).to_linear_map.comp (proj Sᗮ).to_linear_map
 
 /-
 The Pythagorean theorem, applied to members of S and Sᗮ.
@@ -82,58 +94,46 @@ begin
 end
 
 /-
-The Pythagorean theorem, applied to members of L(S) and L(S)ᗮ
+The extension (extend L) is an isometry.
 -/
-lemma norm_add_sq_orthogonal_L (x : S) (y : Sᗮ) : ∥ (L x) + ((L' S L) y) ∥^2 = ∥ (L x) ∥^2 + ∥ ((L' S L) y) ∥^2 :=
+lemma extend_isometry : ∀ (x : ℂ^n), ∥ (extend L) x ∥^2 = ∥ x ∥^2 :=
 begin
-  have hLx : L x ∈ (range L) := L.to_linear_map.mem_range_self x,
-  have hLy : (L' S L) y ∈ (range L)ᗮ :=
+  intro x,
+  have x_decomp : x = ↑((proj S) x) + ↑((proj Sᗮ) x) := eq_sum_orthogonal_projection_self_orthogonal_complement S x,
+  conv
+  begin
+    to_rhs,
+    rw x_decomp,
+  end,
+  have h_xS : ↑((proj S) x) ∈ S := set_like.coe_mem ((proj S) x),
+  have h_xSperp : ↑((proj Sᗮ) x) ∈ Sᗮ := set_like.coe_mem ((proj Sᗮ) x),
+  rw norm_add_sq_orthogonal S ((proj S) x) ((proj Sᗮ) x) h_xS h_xSperp,
+
+  have Mx_decomp : (extend L) x = L ((proj S) x) + (L' S L)((proj Sᗮ) x) :=
+  begin
+    simp only [linear_isometry.coe_to_linear_map, continuous_linear_map.to_linear_map_eq_coe,
+      add_left_inj, eq_self_iff_true, function.comp_app, linear_map.coe_comp, linear_isometry.map_eq_iff,
+      continuous_linear_map.coe_coe, linear_map.add_apply],
+  end,
+  rw Mx_decomp,
+  have h_Lx : L ((proj S) x) ∈ (range L) := L.to_linear_map.mem_range_self ((proj S) x),
+  have h_L'x : (L' S L)((proj Sᗮ) x) ∈ (range L)ᗮ :=
   begin
     rw L',
     simp only [ submodule.subtype_apply, linear_isometry.coe_comp,
       function.comp_app, submodule.coe_mem, submodule.coe_subtypeₗᵢ ],
   end,
-  exact norm_add_sq_orthogonal (range L) (L x) ((L' S L) y) hLx hLy,
+  rw norm_add_sq_orthogonal (range L) (L ((proj S) x)) ((L' S L) ((proj Sᗮ) x)) h_Lx h_L'x,
+  simp only [linear_isometry.norm_map, submodule.coe_norm],
 end
 
 /-
-todo: break this up into smaller pieces
+The extension (extend L) agrees with L on S.
 -/
-theorem isometry_extend : ∃ (M : (ℂ^n) →ₗᵢ[ℂ] (ℂ^n)), (∀ (s : S), M s = L s) :=
+
+lemma extend_on_submodule : ∀ (s : S), (extend L) s = L s :=
 begin
-  let M := L.to_linear_map.comp (proj S).to_linear_map
-            + (L' S L).to_linear_map.comp (proj Sᗮ).to_linear_map,
-  use M,
-  intro x,
-  have : ∥ M x ∥^2 = ∥ x ∥^2 :=
-  begin
-    have x_decomp : x = ↑((proj S) x) + ↑((proj Sᗮ) x) := eq_sum_orthogonal_projection_self_orthogonal_complement S x,
-    have : M x = L ((proj S) x) + (L' S L)((proj Sᗮ) x) :=
-    begin
-      simp only [M],
-      simp only [linear_isometry.coe_to_linear_map, continuous_linear_map.to_linear_map_eq_coe, add_left_inj,
-        eq_self_iff_true, function.comp_app, linear_map.coe_comp, linear_isometry.map_eq_iff,
-        continuous_linear_map.coe_coe, linear_map.add_apply],
-    end,
-    rw this,
-    conv
-    begin
-      to_rhs,
-      rw x_decomp,
-    end,
-    rw norm_add_sq_orthogonal S ((proj S) x) ((proj Sᗮ) x),
-    rw @norm_add_sq_orthogonal_L _ S L ((proj S) x) ((proj Sᗮ) x),
-    simp only [linear_isometry.norm_map, add_left_inj, eq_self_iff_true, sq_eq_sq],
-    simp only [submodule.norm_coe, add_left_inj, eq_self_iff_true, sq_eq_sq],
-    simp only [submodule.coe_mem],
-    simp only [submodule.coe_mem],
-  end,
-  rw sq_eq_sq at this,
-  exact this,
-  exact norm_nonneg _,
-  exact norm_nonneg _,
   intro s,
-  rw ← linear_isometry.coe_to_linear_map,
   simp only [add_right_eq_self,
     linear_isometry.coe_to_linear_map,
     continuous_linear_map.to_linear_map_eq_coe,
@@ -145,4 +145,21 @@ begin
   rw orthogonal_projection_mem_subspace_orthogonal_complement_eq_zero,
   simp only [eq_self_iff_true, linear_isometry.map_zero],
   simp only [submodule.orthogonal_orthogonal, submodule.coe_mem],
+end
+
+/-
+There exists an isometry that extends L, namely (extend L).
+-/
+theorem isometry_extend : ∃ (M : (ℂ^n) →ₗᵢ[ℂ] (ℂ^n)), (∀ (s : S), M s = L s) :=
+begin
+  let M := (extend L),
+  use M,
+  have : ∀ (x : ℂ^n), ∥ M x ∥^2 = ∥ x ∥^2 := extend_isometry S L,
+  intro x,
+  specialize this x,
+  rw sq_eq_sq at this,
+  exact this,
+  exact norm_nonneg _,
+  exact norm_nonneg _,
+  exact extend_on_submodule S L,
 end

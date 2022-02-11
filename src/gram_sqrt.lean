@@ -7,7 +7,7 @@ uses is_positive, thm_7_35_b_c
 -- Dan
 
 /-
-The goal of this file is to show that (T† T), the gram operator of T, has a square root:
+The goal of this file is to show that (T† T), the Gram operator of T, has a square root:
 -/
 
 
@@ -19,7 +19,7 @@ localized "postfix `†`:1000 := linear_map.adjoint" in src
 
 
 /-
-The gram operator is self-adjoint
+The Gram operator is self-adjoint
 -/
 lemma gram_sa :
   inner_product_space.is_self_adjoint (T† * T) :=
@@ -29,7 +29,7 @@ begin
 end
 
 /-
-The gram matrix is positive
+The Gram operator is positive
 -/
 lemma gram_pos :
   is_positive (T† * T) :=
@@ -41,7 +41,7 @@ begin
 end
 
 /-
-The gram operator has a square root
+The Gram operator has a square root
 -/
 lemma sqrt_gram_exists :
   ∃ (R : Lℂ^n), (R^2 = T† * T) ∧ (inner_product_space.is_self_adjoint R) ∧ (is_positive R) := 
