@@ -1,4 +1,4 @@
-import .gram
+import .gram_sqrt
 import .polar_decomp
 
 open_locale big_operators complex_conjugate matrix

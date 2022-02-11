@@ -1,10 +1,9 @@
 /-
 The goal of this file is to prove the following.  If S ⊆ ℂ^n is a subspace and L : S → V is
 an isometry, then there exists an isometry M : ℂ^n → ℂ^n such that M(s) = L(s) for every s ∈ S.
--/
 
-/-
-Checked by: Hans
+-- Checked over by: 
+-- Hans
 -/
 
 import analysis.inner_product_space.pi_L2

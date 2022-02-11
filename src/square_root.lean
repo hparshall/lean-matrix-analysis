@@ -9,7 +9,7 @@ on ℂ^n has a positive, self-adjoint square root.
 /-
 uses lem_7_15
 -/
-import .ladr_7
+import .self_adjoint
 import .orthonormal_basis
 
 open_locale big_operators complex_conjugate matrix
@@ -92,7 +92,7 @@ lemma sqrt_sq (hpos : is_positive T):
 lemma sqrt_is_sa (hpos : is_positive T) :
   is_sa R :=
   begin
-    rw [self_adjoint_iff_eq_adjoint, linear_map.eq_adjoint_iff_basis (ew) (ew)],
+    rw [is_self_adjoint_iff_eq_adjoint, linear_map.eq_adjoint_iff_basis (ew) (ew)],
     intros i j,
     by_cases h : (i = j),
     iterate {rw ← h},
@@ -140,7 +140,7 @@ lemma sqrt_is_positive (hpos : is_positive T) :
   is_positive (sqrt T hsa) :=
 begin
   intro x,
-  exact ⟨sqrt_is_positive' T hsa hpos x, complex.eq_conj_iff_im.1 ((lem_7_15 R).1 (sqrt_is_sa T hsa hpos) x)⟩,
+  exact ⟨sqrt_is_positive' T hsa hpos x, complex.eq_conj_iff_im.1 ((is_self_adjoint_iff_real_inner_map R).1 (sqrt_is_sa T hsa hpos) x)⟩,
 end
 
 
