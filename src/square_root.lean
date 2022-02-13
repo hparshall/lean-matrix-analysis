@@ -5,16 +5,14 @@ on ℂ^n has a positive, self-adjoint square root.
 
 -- Checked over by:
 -- Dan
+-- Hans
 
-/-
-uses lem_7_15
--/
 import .self_adjoint
 import .orthonormal_basis
 
 open_locale big_operators complex_conjugate matrix
 
-notation `is_sa` := inner_product_space.is_self_adjoint
+local notation `is_sa` := inner_product_space.is_self_adjoint
 
 /-
 Throughout, T is a positive, self-adjoint linear operator on ℂ^n.
@@ -52,9 +50,9 @@ theorem eig_nonneg_of_pos (hpos : is_positive T):
   (∀ i : (fin n), 0 ≤ ((ev) i)) :=
   begin
     intro i,
-    calc 0 ≤ ⟪ T ((hsa.eigenvector_basis hn) i), ((hsa.eigenvector_basis hn) i) ⟫_ℂ.re : (hpos (hsa.eigenvector_basis hn i)).1
-      ... = ⟪ ↑((ev) i) • ((hsa.eigenvector_basis hn) i), ((hsa.eigenvector_basis hn) i) ⟫_ℂ.re : by {rw inner_product_space.is_self_adjoint.apply_eigenvector_basis hsa hn i}
-      ... = ((ev) i • ⟪ ((hsa.eigenvector_basis hn) i), ((hsa.eigenvector_basis hn) i) ⟫_ℂ).re : by {rw @inner_smul_real_left ℂ _ _ _ ((hsa.eigenvector_basis hn) i) ((hsa.eigenvector_basis hn) i) ( ((ev) i))}
+    calc 0 ≤ ⟪ T ((ew) i), (ew i) ⟫_ℂ.re : (hpos (ew i)).1
+      ... = ⟪ ↑((ev) i) • ((ew) i), ((ew) i) ⟫_ℂ.re : by {rw inner_product_space.is_self_adjoint.apply_eigenvector_basis hsa hn i}
+      ... = ((ev) i • ⟪ ((ew) i), ((ew) i) ⟫_ℂ).re : by {rw @inner_smul_real_left ℂ _ _ _ ((ew) i) ((ew) i) ( ((ev) i))}
       ... = (ev) i : by {rw inner_self_eq_norm_sq_to_K, rw (hsa.eigenvector_basis_orthonormal hn).1, simp only [one_pow, mul_one, complex.real_smul, complex.of_real_one, complex.of_real_re, eq_self_iff_true]},
   end
 

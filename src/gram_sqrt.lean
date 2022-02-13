@@ -1,10 +1,8 @@
 import .square_root
-/-
-uses is_positive, thm_7_35_b_c
--/
 
 -- Checked over by:
 -- Dan
+-- Hans
 
 /-
 The goal of this file is to show that (T† T), the Gram operator of T, has a square root:

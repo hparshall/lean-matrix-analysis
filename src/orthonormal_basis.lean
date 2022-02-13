@@ -1,3 +1,10 @@
+/-
+The goal of this file is to express basis coordinates in terms of the inner product.
+
+-- Checked over by: 
+-- Hans
+-/
+
 import analysis.inner_product_space.pi_L2
 
 notation `ℂ^` n := euclidean_space ℂ (fin n)
@@ -22,7 +29,6 @@ begin
     congr,
     skip,
     funext,
-    dedup,
     rw inner_smul_right,
     rw hon,
     simp,
