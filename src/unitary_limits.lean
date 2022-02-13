@@ -35,13 +35,9 @@ local notation `U_n` := matrix.unitary_group (fin n) 𝕜
 
 variables (B : ℕ → M_n)
 
-instance Un_t2_space  : t2_space M_n := sorry
-
-lemma matrix_unitary_seq_compact : seq_compact_space U_n := sorry
+instance matrix_normed_star_monoid : normed_star_monoid M_n := sorry
 
 instance matrix_continuous_mul : has_continuous_mul M_n := sorry
-
-instance matrix_normed_star_monoid : normed_star_monoid M_n := sorry
 
 example (h_lim : filter.tendsto B filter.at_top (𝓝 L)) (h_B : ∀ (i : ℕ), (B i) ∈ U_n) :
   L ∈ U_n :=
