@@ -56,7 +56,7 @@ begin
   rw linear_map.mem_ker,
   rw linear_map.mem_ker at h,
   apply (norm_sq_eq_zero _).1,
-  calc ∥ (sqrt' T) x ∥^2 = ∥ T x ∥^2 : by {rw ← eq_7_46}
+  calc ∥ (R) x ∥^2 = ∥ T x ∥^2 : by {rw ← eq_7_46}
     ...                  = ∥ (0 : ℂ^n) ∥^2 : by {rw h}
     ...                  = 0 : by {rw norm_zero, ring},
   intro h,
