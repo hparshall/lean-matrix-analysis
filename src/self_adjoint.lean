@@ -90,10 +90,8 @@ lemma self_adjoint_real_inner (h : is_sa T) :
   ∀ v : ℂ^n, conj ⟪T v, v⟫_ℂ = ⟪T v, v⟫_ℂ :=
 begin
   intro v,
-  rw inner_conj_sym,
-  rw ← linear_map.adjoint_inner_left,
-  rw is_self_adjoint_iff_eq_adjoint at h,
-  rw ← h,
+  apply inner_product_space.is_self_adjoint.conj_inner_sym,
+  exact h,
 end
 
 /-
