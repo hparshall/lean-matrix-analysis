@@ -44,20 +44,17 @@ begin
     rw [matrix.star_eq_conj_transpose, norm_matrix_le_iff (norm_nonneg M)],
     intros i j,
     simp only [matrix.conj_transpose_apply, normed_star_monoid.norm_star],
-    apply norm_entry_le_entrywise_sup_norm 𝕜 M _ _,
+    apply norm_entry_le_entrywise_sup_norm,
   end,
   have no_star_le : ∥M∥ ≤ ∥star M∥ :=
   begin
     rw matrix.star_eq_conj_transpose,
     rw norm_matrix_le_iff (norm_nonneg Mᴴ),
     intros i j,
-    by_contra,
-    push_neg at h,
-    rw norm_matrix_lt_iff at h,
-    specialize h j i,
-    simp only [matrix.conj_transpose_apply, normed_star_monoid.norm_star] at h,
-    linarith,
-    apply @lt_of_le_of_lt _ _ 0 (∥Mᴴ∥) _ (norm_nonneg Mᴴ) h,
+    have : ∥M i j∥ = ∥Mᴴ j i∥ :=
+      by simp only [matrix.conj_transpose_apply, eq_self_iff_true,normed_star_monoid.norm_star],
+    rw this,
+    apply norm_entry_le_entrywise_sup_norm,
   end,
   exact ge_antisymm no_star_le star_le,
 end
@@ -142,6 +139,9 @@ instance matrix_continuous_mul : has_continuous_mul M_n :=
 instance matrix_proper_space : proper_space M_n := pi_proper_space
 
 def cols (M : M_n) :=
+  λ (i : (fin n)), (id (Mᵀ i) : 𝕜^n)
+
+def rows (M : M_n) :=
   λ (i : (fin n)), (id (Mᵀ i) : 𝕜^n)
 
 lemma inner_cols_mat_mul (i j : (fin n)) (U : M_n):
