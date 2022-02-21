@@ -128,7 +128,7 @@ begin
   exact hA,
 end
 
-example (h_lim : filter.tendsto B filter.at_top (𝓝 L)) (h_B : ∀ (i : ℕ), (B i) ∈ U_n) :
+lemma limit_unitary_of_unitary (h_lim : filter.tendsto B filter.at_top (𝓝 L)) (h_B : ∀ (i : ℕ), (B i) ∈ U_n) :
   L ∈ U_n :=
 begin
   have h_left : filter.tendsto (star B) filter.at_top (𝓝 (star L)) :=

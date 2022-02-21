@@ -8,19 +8,19 @@ on ℂ^n has a positive, self-adjoint square root.
 -- Hans
 
 import .self_adjoint
-import .orthonormal_basis
 
 open_locale big_operators complex_conjugate matrix
+namespace inner_product_space
 
-local notation `is_sa` := inner_product_space.is_self_adjoint
+local notation `is_sa` := is_self_adjoint
 
 /-
 Throughout, T is a positive, self-adjoint linear operator on ℂ^n.
 -/
 
-variables {n : ℕ} (T : Lℂ^n) (hsa : is_sa T)
+variables {n : ℕ} {T : Lℂ^n} (T_sa : is_self_adjoint T)
 
-def is_positive :=
+def is_positive (T : Lℂ^n) :=
   (∀ x : ℂ^n, (⟪T x, x⟫_ℂ.re ≥ 0) ∧ (⟪T x, x⟫_ℂ.im = 0))
 
 variable (hpos : is_positive T)
@@ -31,27 +31,26 @@ The spectral theorem allows us to define √T
 
 lemma hn : finite_dimensional.finrank ℂ (ℂ^n) = n := finrank_euclidean_space_fin
 
-local notation `ev` := hsa.eigenvalues hn
-local notation `ew` := hsa.eigenvector_basis hn
+local notation `ev` := T_sa.eigenvalues hn
+local notation `ew` := T_sa.eigenvector_basis hn
 
 local notation `sqrt_ew` := λ (i : (fin n)), (real.sqrt(((ev) i)) : ℂ) • ((ew) i)
 
-noncomputable def sqrt : Lℂ^n :=
+noncomputable def is_self_adjoint.sqrt : Lℂ^n :=
   @basis.constr (fin n) ℂ (ℂ^n) (ℂ^n) _ _ _ _ _ (ew) ℂ _ _ _ (sqrt_ew)
 
-local notation `R` := (sqrt T) hsa
-
+-- local notation `√T` := (sqrt T) hsa
 
 /-
 T is positive, and so its eigenvalues are nonnegative.
 -/
 
 theorem eig_nonneg_of_pos (hpos : is_positive T):
-  (∀ i : (fin n), 0 ≤ ((ev) i)) :=
+  (∀ i : (fin n), 0 ≤ ((T_sa.eigenvalues hn) i)) :=
   begin
     intro i,
     calc 0 ≤ ⟪ T ((ew) i), (ew i) ⟫_ℂ.re : (hpos (ew i)).1
-      ... = ⟪ ↑((ev) i) • ((ew) i), ((ew) i) ⟫_ℂ.re : by {rw inner_product_space.is_self_adjoint.apply_eigenvector_basis hsa hn i}
+      ... = ⟪ ↑((ev) i) • ((ew) i), ((ew) i) ⟫_ℂ.re : by {rw is_self_adjoint.apply_eigenvector_basis hsa hn i}
       ... = ((ev) i • ⟪ ((ew) i), ((ew) i) ⟫_ℂ).re : by {rw @inner_smul_real_left ℂ _ _ _ ((ew) i) ((ew) i) ( ((ev) i))}
       ... = (ev) i : by {rw inner_self_eq_norm_sq_to_K, rw (hsa.eigenvector_basis_orthonormal hn).1, simp only [one_pow, mul_one, complex.real_smul, complex.of_real_one, complex.of_real_re, eq_self_iff_true]},
   end
@@ -62,9 +61,9 @@ By definition, √T has the same eigenvectors as T, with sqrt eigenvalues.
 -/
 
 lemma sqrt_apply (i : fin n):
-  R ((ew) i) = (real.sqrt ((ev) i) : ℂ) • ((ew) i) :=
+  (T_sa.sqrt) ((ew) i) = (real.sqrt ((ev) i) : ℂ) • ((ew) i) :=
 begin
-  rw [sqrt, (ew).constr_basis],
+  simp?,
 end
 
 /-
@@ -72,11 +71,11 @@ We have √T^2 = T.
 -/
 
 lemma sqrt_sq (hpos : is_positive T):
-  ((sqrt T hsa) * (sqrt T hsa)) = T :=
+  ((T_sa.sqrt) * (T_sa.sqrt)) = T :=
   begin
     apply basis.ext ew,
     intro i,
-    calc (R * R) (ew i) = R (R (ew i)) : by {rw linear_map.mul_apply}
+    calc ((sqrt T_sa) * (sqrt T_sa)) (ew i) = (T_sa.sqrt) (T_sa.sqrt (ew i)) : by {rw linear_map.mul_apply}
     ...                 = R (↑(real.sqrt(ev i)) • (ew i)) : by {rw sqrt_apply}
     ...                 = real.sqrt(ev i) • R ((ew i)) : by {rw linear_map.map_smul, norm_cast}
     ...                 = (ev i) • (ew i) : by {rw sqrt_apply, norm_cast, rw smul_smul, rw real.mul_self_sqrt, exact eig_nonneg_of_pos T hsa hpos i}
@@ -105,6 +104,8 @@ lemma sqrt_is_sa (hpos : is_positive T) :
 /-
 √T scales basis coordinates by sqrt eigenvalues.
 -/
+
+
 
 lemma sqrt_repr (x : ℂ^n) (i : fin n) (hpos : is_positive T):
   (ew).repr (R x) i = (real.sqrt((ev) i)) • ((ew).repr x i) :=

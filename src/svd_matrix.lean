@@ -1,15 +1,37 @@
 import .svd
 import data.matrix.basic
 import algebra.star.basic
-
+import .examples.std_basis_proof
 
 -- -- theorem svd_matrix : ∃ U Σ V : matrix (fin n) (fin n) ℂ, A = U * Σ * V ∧ (Uᴴ = U ∧ Vᴴ = V) :=
 -- -- sorry
 
-variables {n : ℕ} (A : matrix (fin n) (fin n) ℂ)
 
-open_locale matrix big_operators
-open classical
+variables {n : ℕ} (ι : Type*) [fintype ι] (A : matrix (fin n) (fin n) ℂ) {𝕜 : Type*} [is_R_or_C 𝕜]
+open_locale matrix big_operators classical complex_conjugate
+
+local notation `⟪`x`, `y`⟫` := @inner 𝕜 _ _ x y
+
+/-- The vector given in euclidean space by being `1 : 𝕜` at coordinate `i : ι` and `0 : 𝕜` at
+all other coordinates. -/
+noncomputable def euclidean_space.single {𝕜 : Type*} {ι : Type*} [fintype ι] [is_R_or_C 𝕜] (i : ι) (a : 𝕜) :
+ euclidean_space 𝕜 ι :=
+  pi.single i a
+
+@[simp] theorem euclidean_space.single_apply {𝕜 : Type*} {ι : Type*} [fintype ι]
+  [is_R_or_C 𝕜] (i : ι) (a : 𝕜) (j : ι) :
+  (euclidean_space.single i a) j = ite (j = i) a 0 :=
+begin
+  rw [euclidean_space.single, pi.single_apply i a j],
+end
+
+lemma euclidean_space.inner_single_left (i : ι) (a : 𝕜) (v : euclidean_space 𝕜 ι) :
+  ⟪euclidean_space.single i (a : 𝕜), v⟫ = conj a * (v i) :=
+by simp [apply_ite conj]
+
+lemma euclidean_space.inner_single_right (i : ι) (a : 𝕜) (v : euclidean_space 𝕜 ι) :
+  ⟪v, euclidean_space.single i (a : 𝕜)⟫ =  a * conj (v i) :=
+by simp [apply_ite conj, mul_comm]
 
 def matrix_to_lin_end (B : matrix (fin n) (fin n) ℂ) : (ℂ^n) → (ℂ^n) :=
 begin
@@ -76,27 +98,24 @@ begin
 end
 
 
-lemma inner_std_basis_is_elem (x : ℂ^n) (j : fin n) : ⟪ x , (pi.basis_fun ℂ (fin n)) j ⟫_ℂ = star_ring_end ℂ (x j) :=
-begin
-  have : x j = ((pi.basis_fun ℂ (fin n)).repr x) j :=
-  begin
-    simp only [pi.basis_fun_repr, eq_self_iff_true],
-  end,
-  rw this,
-  rw onb_coords_eq_inner,
-  conv
-  begin
-    to_lhs,
-    rw ← @inner_conj_sym _ _ _ _ x ((pi.basis_fun ℂ (fin n)) j),
-  end,
-  sorry, -- need to show standard basis is orthonormal
-end
-
 lemma std_basis_to_matrix_apply (f : basis (fin n) ℂ ℂ^n) (i j : fin n) : (pi.basis_fun ℂ (fin n)).to_matrix f i j = f j i :=
 begin
   sorry,
 end
 
+example : ∃ (U V : matrix (fin n) (fin n) ℂ) (s : (fin n) → ℝ), A = U * (matrix.diagonal ↑s) * Vᴴ ∧ (Uᴴ ⬝ U = 1) ∧ (Vᴴ ⬝ V = 1) :=
+begin
+  let T := (id(A.to_lin') : Lℂ^n),
+  choose e f svd_T using (svd T),
+  -- let std_basis := std_orthonormal_basis,
+  -- let std_basis : basis (fin n) ℂ ℂ^n := basis.mk euclidean_space.single,
+  let U : matrix (fin n) (fin n) ℂ := (fin_orthonormal_basis (finrank_euclidean_space_fin (ℂ^n)) ℂ (ℂ^n)).to_matrix ⇑f,
+  let V := (std_orthonormal_basis ℂ (ℂ^n)).to_matrix ⇑e,
+  use U,
+  use V,
+  use (singular_values T),
+
+end
 
 -- TODO:  Define singular values for matrices 
 
