@@ -21,6 +21,8 @@ local notation `M_n` := (matrix (fin n) (fin n) 𝕜)
 
 local notation `U_n` := matrix.unitary_group (fin n) 𝕜
 
+local notation `⟪`x`, `y`⟫` := @inner 𝕜 (euclidean_space 𝕜 (fin n)) _ x y
+
 variables (A B : ℕ → M_n) (L : M_n)
 
 /-
@@ -162,17 +164,13 @@ end
 
 lemma unitary_matrix_bounded (U : M_n) (hU : U ∈ U_n) : ∥ U ∥ ≤ 1 :=
 begin
-  rw pi_norm_le_iff,
+  rw pi_norm_le_iff zero_le_one,
   intro i,
-  rw pi_norm_le_iff,
+  rw pi_norm_le_iff zero_le_one,
   intro j,
   have norm_sum : ∥ U i j ∥^2 ≤ (∑ (x : (fin n)), ∥ U x j ∥^2) :=
   begin
-    conv
-    begin
-      to_rhs,
-      rw fin.sum_univ_def,
-    end,
+    rw fin.sum_univ_def,
     apply list.single_le_sum,
     intros x h_x,
     rw list.mem_map at h_x,
@@ -183,13 +181,24 @@ begin
     use i,
     simp only [list.mem_fin_range, eq_self_iff_true, and_self, sq_eq_sq],
   end,
+  -- wip to simplify below
+  -- have col_norm : ∑ (x : (fin n)), ∥U x j∥^2 = ∥U j∥^2 := sorry,
+
+  -- have col_entry : ⟪U j, U j⟫ = (U ⬝ Uᴴ) j j,
+  --   {
+  --     unfold inner,
+  --     simp only [matrix.mul_apply, star_ring_end_apply,matrix.conj_transpose_apply,mul_comm],
+  --   },
+
+  -- have iden : Uᴴ ⬝ U = 1 := unitary.star_mul_self_of_mem hU,
+
   have col_norm : ∑ (x : (fin n)), ∥ U x j ∥^2 = 1 :=
   begin
     have : orthonormal 𝕜 (cols 𝕜 U) := unitary_orthonormal_cols 𝕜 U hU,
     rw orthonormal_iff_ite at this,
     specialize this j j,
     simp only [if_true, eq_self_iff_true] at this,
-    rw cols at this,
+    -- rw cols at this,
     simp at this,
     conv at this
     begin
@@ -206,8 +215,6 @@ begin
   rw col_norm at norm_sum,
   norm_num at norm_sum,
   exact norm_sum,
-  linarith,
-  linarith,
 end
 
 lemma unitary_bounded : metric.bounded ((U_n) : set M_n) :=
