@@ -32,13 +32,11 @@ noncomputable instance matrix_normed_group : normed_group M_n := matrix.normed_g
 
 noncomputable instance matrix_normed_space : normed_space 𝕜 M_n := matrix.normed_space
 
-lemma norm_matrix_lt_iff (M : M_n) {r : ℝ} (hr : r > 0): 
-  ∥M∥ < r ↔ ∀ i j, ∥M i j∥ < r :=
-by simp [pi_norm_lt_iff hr]
-
+-- current PR
 lemma norm_entry_le_entrywise_sup_norm (M : M_n) (i j : (fin n)) :
   ∥M i j∥ ≤ ∥M∥ := @le_trans _ _ _ _ _ (norm_le_pi_norm (M i) j) (norm_le_pi_norm M i)
 
+-- uses norm_entry_le_entrywise_sup_norm
 lemma entrywise_sup_norm_star_eq_norm (M : M_n) : ∥star M∥ = ∥M∥ :=
 begin
   have star_le : ∥star M∥ ≤ ∥M∥ :=
@@ -140,37 +138,25 @@ instance matrix_continuous_mul : has_continuous_mul M_n :=
 
 instance matrix_proper_space : proper_space M_n := pi_proper_space
 
-def cols (M : M_n) :=
-  λ (i : (fin n)), (id (Mᵀ i) : 𝕜^n)
+-- current PR
+lemma inner_matrix_row_row (A B : matrix (fin n) (fin n) 𝕜) (i j : (fin n)) :
+  ⟪A i, B j⟫ = (B ⬝ Aᴴ) j i := by {simp only [inner, matrix.mul_apply, star_ring_end_apply,
+    matrix.conj_transpose_apply,mul_comm]}
 
-def rows (M : M_n) :=
-  λ (i : (fin n)), (id (Mᵀ i) : 𝕜^n)
+-- current PR
+lemma inner_matrix_col_col (A B : matrix (fin n) (fin n) 𝕜) (i j : (fin n)) :
+  ⟪Aᵀ i, Bᵀ j⟫ = (Aᴴ ⬝ B) i j := by {simp only [inner, matrix.mul_apply, star_ring_end_apply,
+    matrix.conj_transpose_apply,matrix.transpose_apply,mul_comm]}
 
-lemma inner_cols_mat_mul (i j : (fin n)) (U : M_n):
-  inner ((cols 𝕜 U i)) (cols 𝕜 U j) = (Uᴴ ⬝ U) i j := by ring
-
-lemma unitary_orthonormal_cols (U : M_n) (hU : U ∈ U_n):
-  orthonormal 𝕜 (cols 𝕜 U) :=
-begin
-  rw orthonormal_iff_ite,
-  have : Uᴴ ⬝ U = 1 := unitary.star_mul_self_of_mem hU,
-  intros i j,
-  rw inner_cols_mat_mul,
-  rw ← matrix.ext_iff at this,
-  specialize this i j,
-  rw ← matrix.one_apply,
-  exact this,
-end
-
-lemma unitary_matrix_bounded (U : M_n) (hU : U ∈ U_n) : ∥ U ∥ ≤ 1 :=
+-- uses inner_matrix_row_row
+lemma unitary_matrix_entrywise_sup_norm_bound (U : M_n) (hU : U ∈ U_n) : ∥ U ∥ ≤ 1 :=
 begin
   rw pi_norm_le_iff zero_le_one,
   intro i,
   rw pi_norm_le_iff zero_le_one,
   intro j,
-  have norm_sum : ∥ U i j ∥^2 ≤ (∑ (x : (fin n)), ∥ U x j ∥^2) :=
-  begin
-    rw fin.sum_univ_def,
+  have norm_sum : ∥ U i j ∥^2 ≤ (∑ (x : (fin n)), ∥ U i x ∥^2),
+  { rw fin.sum_univ_def,
     apply list.single_le_sum,
     intros x h_x,
     rw list.mem_map at h_x,
@@ -178,42 +164,19 @@ begin
     rw ← h_a.2,
     norm_num,
     rw list.mem_map,
-    use i,
-    simp only [list.mem_fin_range, eq_self_iff_true, and_self, sq_eq_sq],
-  end,
-  -- wip to simplify below
-  -- have col_norm : ∑ (x : (fin n)), ∥U x j∥^2 = ∥U j∥^2 := sorry,
-
-  -- have col_entry : ⟪U j, U j⟫ = (U ⬝ Uᴴ) j j,
-  --   {
-  --     unfold inner,
-  --     simp only [matrix.mul_apply, star_ring_end_apply,matrix.conj_transpose_apply,mul_comm],
-  --   },
-
-  -- have iden : Uᴴ ⬝ U = 1 := unitary.star_mul_self_of_mem hU,
-
-  have col_norm : ∑ (x : (fin n)), ∥ U x j ∥^2 = 1 :=
-  begin
-    have : orthonormal 𝕜 (cols 𝕜 U) := unitary_orthonormal_cols 𝕜 U hU,
-    rw orthonormal_iff_ite at this,
-    specialize this j j,
-    simp only [if_true, eq_self_iff_true] at this,
-    -- rw cols at this,
-    simp at this,
-    conv at this
-    begin
-      to_lhs,
-      congr,
-      skip,
-      funext,
-      rw is_R_or_C.conj_mul_eq_norm_sq_left,
-      rw is_R_or_C.norm_sq_eq_def',
-    end,
-    norm_cast at this,
-    exact this,
-  end,
-  rw col_norm at norm_sum,
-  norm_num at norm_sum,
+    use j,
+    simp only [list.mem_fin_range, eq_self_iff_true, and_self, sq_eq_sq]},
+  have norm_sum_eq_inner : ∑ (x : (fin n)), ∥ U i x ∥^2 = is_R_or_C.re ⟪U i, U i⟫,
+  { simp only [is_R_or_C.inner_apply, pi_Lp.inner_apply, finset.sum_congr, 
+      is_R_or_C.conj_mul_eq_norm_sq_left, is_R_or_C.norm_sq_eq_def'],
+    norm_cast},
+  have inner_eq_one : is_R_or_C.re ⟪U i, U i⟫ = 1,
+  { have : U ⬝ Uᴴ = 1, from unitary.mul_star_self_of_mem hU,
+    simp only [this, inner_matrix_row_row, is_R_or_C.one_re, eq_self_iff_true,
+      matrix.one_apply_eq]},
+  rw ← sq_le_one_iff (norm_nonneg (U i j)),
+  rw ← inner_eq_one,
+  rw ← norm_sum_eq_inner,
   exact norm_sum,
 end
 
