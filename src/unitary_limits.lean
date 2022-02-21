@@ -1,10 +1,12 @@
 import data.complex.is_R_or_C
 import topology.basic
 import topology.algebra.matrix
+import topology.metric_space.basic
 import analysis.normed_space.basic
 import linear_algebra.unitary_group
 import analysis.normed_space.pi_Lp
 import analysis.inner_product_space.pi_L2
+import analysis.normed_space.bounded_linear_maps
 
 variables {m n : ℕ}
 
@@ -28,13 +30,118 @@ noncomputable instance matrix_normed_group : normed_group M_n := matrix.normed_g
 
 noncomputable instance matrix_normed_space : normed_space 𝕜 M_n := matrix.normed_space
 
-instance matrix_normed_star_monoid : normed_star_monoid M_n := sorry
+lemma norm_matrix_lt_iff (M : M_n) {r : ℝ} (hr : r > 0): 
+  ∥M∥ < r ↔ ∀ i j, ∥M i j∥ < r :=
+by simp [pi_norm_lt_iff hr]
 
-instance matrix_continuous_mul : has_continuous_mul M_n := sorry
+lemma norm_entry_le_entrywise_sup_norm (M : M_n) (i j : (fin n)) :
+  ∥M i j∥ ≤ ∥M∥ := @le_trans _ _ _ _ _ (norm_le_pi_norm (M i) j) (norm_le_pi_norm M i)
 
-instance matrix_proper_space : proper_space M_n := sorry
+lemma entrywise_sup_norm_star_eq_norm (M : M_n) : ∥star M∥ = ∥M∥ :=
+begin
+  have star_le : ∥star M∥ ≤ ∥M∥ :=
+  begin
+    rw [matrix.star_eq_conj_transpose, norm_matrix_le_iff (norm_nonneg M)],
+    intros i j,
+    simp only [matrix.conj_transpose_apply, normed_star_monoid.norm_star],
+    apply norm_entry_le_entrywise_sup_norm,
+  end,
+  have no_star_le : ∥M∥ ≤ ∥star M∥ :=
+  begin
+    rw matrix.star_eq_conj_transpose,
+    rw norm_matrix_le_iff (norm_nonneg Mᴴ),
+    intros i j,
+    have : ∥M i j∥ = ∥Mᴴ j i∥ :=
+      by simp only [matrix.conj_transpose_apply, eq_self_iff_true,normed_star_monoid.norm_star],
+    rw this,
+    apply norm_entry_le_entrywise_sup_norm,
+  end,
+  exact ge_antisymm no_star_le star_le,
+end
+
+noncomputable instance matrix_normed_star_monoid : normed_star_monoid M_n :=
+{
+  norm_star := entrywise_sup_norm_star_eq_norm 𝕜
+}
+
+
+instance matrix_continuous_mul : has_continuous_mul M_n := 
+{
+  continuous_mul :=
+  begin
+    continuity,
+    conv
+    begin
+      congr,
+      funext,
+      rw matrix.mul_eq_mul,
+      rw matrix.mul_apply,
+    end,
+    continuity,
+    let f := λ (x : matrix (fin n) (fin n) 𝕜 × matrix (fin n) (fin n) 𝕜), x.fst i i_2,
+    have hf1 : is_linear_map 𝕜 f :=
+    {
+      map_add :=
+      begin
+        intros x y,
+        simp only [f, add_left_inj, pi.add_apply, eq_self_iff_true, prod.fst_add],
+      end,
+      map_smul :=
+      begin
+        intros x y,
+        simp only [f, algebra.id.smul_eq_mul, mul_eq_mul_left_iff, true_or, eq_self_iff_true,
+          prod.smul_fst, pi.smul_apply],
+      end,
+    },
+    have hf2 : is_bounded_linear_map 𝕜 f :=
+    begin
+      apply is_linear_map.with_bound hf1 1,
+      simp only [f],
+      simp only [prod.forall, one_mul],
+      intros a b,
+      have ha1 : ∥a i i_2∥ ≤ ∥a∥ := norm_entry_le_entrywise_sup_norm 𝕜 a _ _,
+      have ha2 : ∥a∥ ≤ ∥(a,b)∥ := by simp only [prod.norm_def, le_refl, true_or, le_max_iff],
+      apply @le_trans _ _ _ _ _ ha1 ha2,
+    end,
+    apply is_bounded_linear_map.continuous hf2,
+    let g := λ (x : matrix (fin n) (fin n) 𝕜 × matrix (fin n) (fin n) 𝕜), x.snd i_2 i_1,
+    have hg1: is_linear_map 𝕜 g :=
+    {
+      map_add :=
+      begin
+        intros x y,
+        simp only [g, add_left_inj, pi.add_apply, eq_self_iff_true, prod.snd_add],
+      end,
+      map_smul := 
+      begin
+        intros x y,
+        simp only [g, algebra.id.smul_eq_mul, mul_eq_mul_left_iff, true_or, eq_self_iff_true,
+          prod.smul_snd, pi.smul_apply],
+      end,
+    },
+    have hg2 : is_bounded_linear_map 𝕜 g :=
+    begin
+      apply is_linear_map.with_bound hg1 1,
+      simp only [g],
+      simp only [prod.forall, one_mul],
+      intros a b,
+      have hb1 : ∥b i_2 i_1∥ ≤ ∥b∥ := norm_entry_le_entrywise_sup_norm 𝕜 b _ _,
+      have hb2 : ∥b∥ ≤ ∥(a,b)∥ :=
+      begin
+        simp only [prod.norm_def, le_refl, or_true, le_max_iff],
+      end,
+      apply @le_trans _ _ (∥b i_2 i_1∥) (∥b∥) (∥(a,b)∥) hb1 hb2,
+    end,
+    apply is_bounded_linear_map.continuous hg2,
+  end
+}
+
+instance matrix_proper_space : proper_space M_n := pi_proper_space
 
 def cols (M : M_n) :=
+  λ (i : (fin n)), (id (Mᵀ i) : 𝕜^n)
+
+def rows (M : M_n) :=
   λ (i : (fin n)), (id (Mᵀ i) : 𝕜^n)
 
 lemma inner_cols_mat_mul (i j : (fin n)) (U : M_n):
