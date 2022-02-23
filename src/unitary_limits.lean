@@ -149,7 +149,7 @@ lemma inner_matrix_col_col (A B : matrix (fin n) (fin n) 𝕜) (i j : (fin n)) :
     matrix.conj_transpose_apply,matrix.transpose_apply,mul_comm]}
 
 -- uses inner_matrix_row_row
-lemma unitary_matrix_entrywise_sup_norm_bound (U : M_n) (hU : U ∈ U_n) : ∥ U ∥ ≤ 1 :=
+lemma entrywise_sup_norm_bound_of_unitary {U : M_n} (hU : U ∈ U_n) : ∥ U ∥ ≤ 1 :=
 begin
   rw pi_norm_le_iff zero_le_one,
   intro i,
@@ -158,22 +158,22 @@ begin
   have norm_sum : ∥ U i j ∥^2 ≤ (∑ (x : (fin n)), ∥ U i x ∥^2),
   { rw fin.sum_univ_def,
     apply list.single_le_sum,
-    intros x h_x,
-    rw list.mem_map at h_x,
-    cases h_x with a h_a,
-    rw ← h_a.2,
-    norm_num,
-    rw list.mem_map,
-    use j,
-    simp only [list.mem_fin_range, eq_self_iff_true, and_self, sq_eq_sq]},
+    { intros x h_x,
+      rw list.mem_map at h_x,
+      cases h_x with a h_a,
+      rw ← h_a.2,
+      norm_num },
+    { rw list.mem_map,
+      use j,
+      simp only [ list.mem_fin_range, eq_self_iff_true, and_self, sq_eq_sq ] } },
   have norm_sum_eq_inner : ∑ (x : (fin n)), ∥ U i x ∥^2 = is_R_or_C.re ⟪U i, U i⟫,
-  { simp only [is_R_or_C.inner_apply, pi_Lp.inner_apply, finset.sum_congr, 
+  { simp only [ is_R_or_C.inner_apply, pi_Lp.inner_apply, finset.sum_congr, 
       is_R_or_C.conj_mul_eq_norm_sq_left, is_R_or_C.norm_sq_eq_def'],
-    norm_cast},
+    norm_cast },
   have inner_eq_one : is_R_or_C.re ⟪U i, U i⟫ = 1,
   { have : U ⬝ Uᴴ = 1, from unitary.mul_star_self_of_mem hU,
-    simp only [this, inner_matrix_row_row, is_R_or_C.one_re, eq_self_iff_true,
-      matrix.one_apply_eq]},
+    simp only [ this, inner_matrix_row_row, is_R_or_C.one_re, eq_self_iff_true,
+      matrix.one_apply_eq ] },
   rw ← sq_le_one_iff (norm_nonneg (U i j)),
   rw ← inner_eq_one,
   rw ← norm_sum_eq_inner,
