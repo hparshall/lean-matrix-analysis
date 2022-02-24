@@ -64,91 +64,51 @@ noncomputable instance matrix_normed_star_monoid : normed_star_monoid M_n :=
   norm_star := entrywise_sup_norm_star_eq_norm 𝕜
 }
 
+instance : semi_normed_ring (matrix (fin n) (fin n) 𝕜) := sorry
 
-instance matrix_continuous_mul : has_continuous_mul M_n := 
-{
-  continuous_mul :=
-  begin
-    continuity,
-    conv
-    begin
-      congr,
-      funext,
-      rw matrix.mul_eq_mul,
-      rw matrix.mul_apply,
-    end,
-    continuity,
-    let f := λ (x : matrix (fin n) (fin n) 𝕜 × matrix (fin n) (fin n) 𝕜), x.fst i i_2,
-    have hf1 : is_linear_map 𝕜 f :=
-    {
-      map_add :=
-      begin
-        intros x y,
-        simp only [f, add_left_inj, pi.add_apply, eq_self_iff_true, prod.fst_add],
-      end,
-      map_smul :=
-      begin
-        intros x y,
-        simp only [f, algebra.id.smul_eq_mul, mul_eq_mul_left_iff, true_or, eq_self_iff_true,
-          prod.smul_fst, pi.smul_apply],
-      end,
-    },
-    have hf2 : is_bounded_linear_map 𝕜 f :=
-    begin
-      apply is_linear_map.with_bound hf1 1,
-      simp only [f],
-      simp only [prod.forall, one_mul],
-      intros a b,
-      have ha1 : ∥a i i_2∥ ≤ ∥a∥ := norm_entry_le_entrywise_sup_norm 𝕜 a _ _,
-      have ha2 : ∥a∥ ≤ ∥(a,b)∥ := by simp only [prod.norm_def, le_refl, true_or, le_max_iff],
-      apply @le_trans _ _ _ _ _ ha1 ha2,
-    end,
-    apply is_bounded_linear_map.continuous hf2,
-    let g := λ (x : matrix (fin n) (fin n) 𝕜 × matrix (fin n) (fin n) 𝕜), x.snd i_2 i_1,
-    have hg1: is_linear_map 𝕜 g :=
-    {
-      map_add :=
-      begin
-        intros x y,
-        simp only [g, add_left_inj, pi.add_apply, eq_self_iff_true, prod.snd_add],
-      end,
-      map_smul := 
-      begin
-        intros x y,
-        simp only [g, algebra.id.smul_eq_mul, mul_eq_mul_left_iff, true_or, eq_self_iff_true,
-          prod.smul_snd, pi.smul_apply],
-      end,
-    },
-    have hg2 : is_bounded_linear_map 𝕜 g :=
-    begin
-      apply is_linear_map.with_bound hg1 1,
-      simp only [g],
-      simp only [prod.forall, one_mul],
-      intros a b,
-      have hb1 : ∥b i_2 i_1∥ ≤ ∥b∥ := norm_entry_le_entrywise_sup_norm 𝕜 b _ _,
-      have hb2 : ∥b∥ ≤ ∥(a,b)∥ :=
-      begin
-        simp only [prod.norm_def, le_refl, or_true, le_max_iff],
-      end,
-      apply @le_trans _ _ (∥b i_2 i_1∥) (∥b∥) (∥(a,b)∥) hb1 hb2,
-    end,
-    apply is_bounded_linear_map.continuous hg2,
-  end
-}
+#check @semi_normed_ring_top_monoid M_n _
+
+instance matrix_cont_mul := @semi_normed_ring_top_monoid M_n _
+
+-- def matrix_continuous_mul : has_continuous_mul M_n :=
+-- { continuous_mul := by { continuity,
+--     simp only [matrix.mul_eq_mul, matrix.mul_apply],
+--     continuity,
+--     { let f := λ (x : matrix (fin n) (fin n) 𝕜 × matrix (fin n) (fin n) 𝕜), x.fst i i_2,
+--       have hf1 : is_linear_map 𝕜 f :=
+--       { map_add := by { intros x y,
+--           simp only [f, add_left_inj, pi.add_apply, eq_self_iff_true, prod.fst_add] },
+--         map_smul := by { intros x y,
+--           simp only [f, algebra.id.smul_eq_mul, mul_eq_mul_left_iff, true_or, eq_self_iff_true,
+--             prod.smul_fst, pi.smul_apply] }, },
+--       have hf2 : is_bounded_linear_map 𝕜 f,
+--       { apply is_linear_map.with_bound hf1 1,
+--         simp only [f, prod.forall, one_mul],
+--         intros a b,
+--         have ha1 : ∥a i i_2∥ ≤ ∥a∥ := norm_entry_le_entrywise_sup_norm 𝕜 a _ _,
+--         have ha2 : ∥a∥ ≤ ∥(a,b)∥ := by simp only [prod.norm_def, le_refl, true_or, le_max_iff],
+--         apply @le_trans _ _ _ _ _ ha1 ha2 },
+--       apply is_bounded_linear_map.continuous hf2 },
+--     { let g := λ (x : matrix (fin n) (fin n) 𝕜 × matrix (fin n) (fin n) 𝕜), x.snd i_2 i_1,
+--       have hg1: is_linear_map 𝕜 g :=
+--       { map_add := by { intros x y,
+--           simp only [g, add_left_inj, pi.add_apply, eq_self_iff_true, prod.snd_add]},
+--         map_smul := by { intros x y,
+--           simp only [g, algebra.id.smul_eq_mul, mul_eq_mul_left_iff, true_or, eq_self_iff_true,
+--             prod.smul_snd, pi.smul_apply] }, },
+--       have hg2 : is_bounded_linear_map 𝕜 g,
+--       { apply is_linear_map.with_bound hg1 1,
+--         simp only [g, prod.forall, one_mul],
+--         intros a b,
+--         have hb1 : ∥b i_2 i_1∥ ≤ ∥b∥ := norm_entry_le_entrywise_sup_norm 𝕜 b _ _,
+--         have hb2 : ∥b∥ ≤ ∥(a,b)∥ := by simp only [prod.norm_def, le_refl, or_true, le_max_iff],
+--         apply @le_trans _ _ (∥b i_2 i_1∥) (∥b∥) (∥(a,b)∥) hb1 hb2, },
+--       apply is_bounded_linear_map.continuous hg2 },
+--   },
+-- }
 
 instance matrix_proper_space : proper_space M_n := pi_proper_space
 
--- current PR
-lemma inner_matrix_row_row (A B : matrix (fin n) (fin n) 𝕜) (i j : (fin n)) :
-  ⟪A i, B j⟫ = (B ⬝ Aᴴ) j i := by {simp only [inner, matrix.mul_apply, star_ring_end_apply,
-    matrix.conj_transpose_apply,mul_comm]}
-
--- current PR
-lemma inner_matrix_col_col (A B : matrix (fin n) (fin n) 𝕜) (i j : (fin n)) :
-  ⟪Aᵀ i, Bᵀ j⟫ = (Aᴴ ⬝ B) i j := by {simp only [inner, matrix.mul_apply, star_ring_end_apply,
-    matrix.conj_transpose_apply,matrix.transpose_apply,mul_comm]}
-
--- uses inner_matrix_row_row
 lemma entrywise_sup_norm_bound_of_unitary {U : M_n} (hU : U ∈ U_n) : ∥ U ∥ ≤ 1 :=
 begin
   rw pi_norm_le_iff zero_le_one,
@@ -188,7 +148,7 @@ begin
     intro x,
     intro h_x,
     simp only [mem_ball_zero_iff],
-    have : ∥ x ∥ ≤ 1 := by apply unitary_matrix_bounded 𝕜 x h_x,
+    have : ∥ x ∥ ≤ 1 := sorry,
     linarith,
   end,
   apply metric.bounded.mono incl,
