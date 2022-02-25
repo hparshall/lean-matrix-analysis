@@ -7,7 +7,23 @@ instance : has_continuous_mul (E →L[𝕜] E) := semi_normed_ring_top_monoid
 
 open_locale big_operators matrix topological_space
 
-lemma tendsto_subseq_of_unitary {A : ℕ → (E →L[𝕜] E)} {L : (E →L[𝕜] E)}
+lemma bound (U : (E →L[𝕜] E)) (hU : U ∈ unitary (E →L[𝕜] E)) : ∥U∥ ≤ 1 :=
+begin
+  apply continuous_linear_map.op_norm_le_bound,
+  norm_num,
+  intro x,
+  simp only [one_mul],
+  apply le_of_pow_le_pow 2 _ _ _,
+  simp only [norm_nonneg],
+  norm_num,
+  rw norm_sq_eq_inner,
+  rw ← continuous_linear_map.adjoint_inner_left,
+  rw unitary.mem_iff at hU,
+  rw ← continuous_linear_map.star_eq_adjoint,
+  sorry,
+end
+
+lemma seq_unitary_tendsto_unitary {A : ℕ → (E →L[𝕜] E)} {L : (E →L[𝕜] E)}
   (hA : ∀ (i : ℕ), A i ∈ unitary (E →L[𝕜] E)) (hL : filter.tendsto A filter.at_top (𝓝 L)) :
   L ∈ unitary (E →L[𝕜] E) :=
 begin
@@ -52,13 +68,16 @@ begin
     rw this,
     exact h,
   end,
-  have lim_LstarL : lim filter.at_top (A * (star A)) = L * (star L) := filter.tendsto.lim_eq tendsto_LstarL,
-  have lim_one : lim filter.at_top (A * (star A)) = 1 := filter.tendsto.lim_eq h_LstarL,
-  have lim_starLL : lim filter.at_top ((star A) * A) = (star L) * L := filter.tendsto.lim_eq tendsto_starLL,
-  have lim_two : lim filter.at_top ((star A) * A) = 1 := filter.tendsto.lim_eq h_starLL,
-  rw ← lim_LstarL,
-  rw ← lim_starLL,
+  have lim_LstarL : lim filter.at_top (A * (star A)) = L * (star L) :=
+    filter.tendsto.lim_eq tendsto_LstarL,
+  have lim_one : lim filter.at_top (A * (star A)) = 1 :=
+    filter.tendsto.lim_eq h_LstarL,
+  have lim_starLL : lim filter.at_top ((star A) * A) = (star L) * L :=
+    filter.tendsto.lim_eq tendsto_starLL,
+  have lim_two : lim filter.at_top ((star A) * A) = 1 :=
+    filter.tendsto.lim_eq h_starLL,
+  rw [← lim_LstarL, ← lim_starLL],
   split,
   exact lim_two,
-  exact lim_one,  
+  exact lim_one,
 end
