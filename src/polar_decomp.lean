@@ -2,179 +2,116 @@ import .gram_sqrt
 import .isometry_extend
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
-variable {n : ℕ}
-variable T : Lℂ^n
+-- variable {n : ℕ}
+-- variable T : Lℂ^n
+variables {𝕜 : Type*} [is_R_or_C 𝕜]
+variables {n : ℕ} {E : Type*} [inner_product_space 𝕜 E] [finite_dimensional 𝕜 E]
+variables {T : E →ₗ[𝕜] E}
+local notation `⟪`x`, `y`⟫` := @inner 𝕜 _ _ x y
+namespace inner_product_space
 
-noncomputable def sqrt' (T : Lℂ^n) : Lℂ^n := classical.some (sqrt_gram_exists T)
+def is_positive' (T : E →ₗ[𝕜] E) : Prop := 
+  ∀ x : E, (is_R_or_C.re ⟪T x, x⟫ ≥ 0)
 
-local notation `R` := (sqrt' T)
+-- noncomputable def sqrt' (T : Lℂ^n) : Lℂ^n := classical.some (sqrt_gram_exists T)
+def sqrt' (T : E →ₗ[𝕜] E) : E →ₗ[𝕜] E := sorry
 
-lemma R_sa : is_sa R :=
-begin
-  have : (R^2 = T† * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
-  exact this.2.1,
-end
+-- local notation `R` := (sqrt' T)
 
-lemma R_mul_mul : R * R = T† * T :=
-begin
-  have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
-  exact this.1,
-end
+-- lemma R_sa : is_sa R :=
+-- begin
+--   have : (R^2 = T† * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
+--   exact this.2.1,
+-- end
 
-lemma R_pos : is_positive R :=
-begin
-  have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
-  exact this.2.2,
-end
+lemma sqrt'_is_self_adjoint (T : E →ₗ[𝕜] E) : is_self_adjoint (sqrt' T) := sorry
+lemma sqrt'_sq (T : E →ₗ[𝕜] E) : (sqrt' T) * (sqrt' T) = T  := sorry
+lemma sqrt'_pos (T : E →ₗ[𝕜] E) : is_positive' (sqrt' T) := sorry
 
--- This is the actual proof the statement, but we use it in the form eq_7_46, since it's really a statement
--- about real numbers.
-lemma eq_7_46': ∀ (v : ℂ^n), (∥ T v ∥^2 : ℂ) = (∥ R v ∥^2 : ℂ) :=
+-- lemma R_mul_mul : R * R = T† * T :=
+-- begin
+--   have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
+--   exact this.1,
+-- end
+
+-- lemma R_pos : is_positive R :=
+-- begin
+--   have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
+--   exact this.2.2,
+-- end
+
+/-- The square root of `T† * T` applied to any element has the same norm as just applying `T`. -/
+lemma norm_apply_eq_norm_sqrt_apply (T : E →ₗ[𝕜] E): ∀ (v : E), ∥ T v ∥^2 = ∥ (sqrt' (T† * T)) v ∥^2 :=
 begin
   intro v,
-  calc (∥ T v ∥^2 : ℂ) = ⟪ T v , T v ⟫_ℂ : by {rw inner_self_eq_norm_sq_to_K}
-    ...          = ⟪ T† (T v), v ⟫_ℂ : by {rw linear_map.adjoint_inner_left}
-    ...          = ⟪ (T† * T) v, v ⟫_ℂ : by {rw comp_eq_mul}
-    ...          = ⟪ (R * R) v, v ⟫_ℂ : by {rw R_mul_mul}
-    ...          = ⟪ R v, R v ⟫_ℂ : by {rw ← comp_eq_mul, rw ← linear_map.adjoint_inner_left, rw sa_means_dag_eq_no_dag (R_sa T)}
-    ...          = (∥ R v ∥^2 : ℂ) : by {rw inner_self_eq_norm_sq_to_K},
-end
--- The actual statement about norms as real numbers:
-lemma eq_7_46: ∀ (v : ℂ^n), (∥ T v ∥^2 : ℝ) = (∥ R v ∥^2 : ℝ) :=
-begin
-  intro v,
-  apply complex.of_real_injective,
-  simp,
-  exact eq_7_46' T v,
+  apply is_R_or_C.of_real_inj.1,
+  calc ↑(∥ T v ∥^2) = ⟪ T v , T v ⟫ : by {rw inner_self_eq_norm_sq_to_K, norm_cast}
+    ...          = ⟪ T† (T v), v ⟫ : by {rw linear_map.adjoint_inner_left}
+    ...          = ⟪ (T† * T) v, v ⟫ : by {rw linear_map.mul_apply}
+    ...          = ⟪ (sqrt' (T† * T) * (sqrt' (T† * T))) v, v ⟫ : by {rw sqrt'_sq (T† * T)}
+    ...          = ⟪ sqrt' (T† * T) v, sqrt' (T† * T) v ⟫ : 
+      by {rw linear_map.mul_apply, rw ← linear_map.adjoint_inner_left,
+        rw ← (linear_map.is_self_adjoint_iff_eq_adjoint (sqrt' (T† * T))).1 (sqrt'_is_self_adjoint (T†*T))}
+    ...          = ↑(∥ sqrt' (T† * T) v ∥^2) : by {rw inner_self_eq_norm_sq_to_K, norm_cast},
 end
 
-lemma ker_eq_sqrt_ker : T.ker = (R).ker :=
+lemma ker_eq_sqrt_ker (T : E →ₗ[𝕜] E) : T.ker = (sqrt' (T† * T)).ker :=
 begin
   ext,
-  split,
-  intro h,
-  rw linear_map.mem_ker,
-  rw linear_map.mem_ker at h,
-  apply (norm_sq_eq_zero _).1,
-  calc ∥ (R) x ∥^2 = ∥ T x ∥^2 : by {rw ← eq_7_46}
-    ...                  = ∥ (0 : ℂ^n) ∥^2 : by {rw h}
-    ...                  = 0 : by {rw norm_zero, ring},
-  intro h,
-
-  rw linear_map.mem_ker,
-  rw linear_map.mem_ker at h,
-
-  apply (norm_sq_eq_zero _).1,
-
-  calc ∥ T x ∥^2 = ∥ R x ∥^2 : by {rw ← eq_7_46}
-    ...                  = ∥ (0 : ℂ^n) ∥^2 : by {rw h}
-    ...                  = 0 : by {rw norm_zero, ring},
+  rw [linear_map.mem_ker, linear_map.mem_ker, ← @norm_eq_zero _ _ (T x), ← @norm_eq_zero _ _ (sqrt' (T† * T) x)],
+  rw (sq_eq_sq (norm_nonneg _) (norm_nonneg _)).1 (norm_apply_eq_norm_sqrt_apply T x),
 end
 
--- We define the isometry by
--- 1. pulling back the range of R to the domain / kernel of R,
--- 2. identifying the kernels of R and T
--- 3. pushing forward from the domain / kernel of T to range T
-noncomputable def S₁ : (R).range ≃ₗ[ℂ] T.range :=
+/-- The isometry between the range of `sqrt (T† * T)` and the range of `T` given by:
+  1. pulling back the range of `sqrt (T† * T)` to `E ⧸ (sqrt (T† *T )).ker`,
+  2. identifying the kernels of `sqrt(T† * T)` and `T`,
+  3. pushing forward from `E ⧸ T.ker` to `T.range`. -/
+noncomputable def S₁ : ↥(sqrt' (T† * T)).range ≃ₗᵢ[𝕜] ↥(T.range) :=
+{ to_linear_equiv :=
 begin
-  have T_first :((ℂ^n) ⧸  T.ker) ≃ₗ[ℂ] T.range :=
-  begin
-    exact linear_map.quot_ker_equiv_range T,
-  end,
-  have Q_first :((ℂ^n) ⧸  (R).ker) ≃ₗ[ℂ] (R).range :=
-  begin
-    exact linear_map.quot_ker_equiv_range R,
-  end,
-  have same_quot : ((ℂ^n) ⧸  (R).ker) ≃ₗ[ℂ] ((ℂ^n) ⧸  T.ker) :=
-  begin
-    exact submodule.quot_equiv_of_eq (R).ker T.ker (ker_eq_sqrt_ker T).symm,
-  end,
+  let T_first : (E ⧸  T.ker) ≃ₗ[𝕜] T.range := linear_map.quot_ker_equiv_range T,
+  let Q_first : (E ⧸  (sqrt' (T† * T)).ker) ≃ₗ[𝕜] (sqrt' (T† * T)).range :=
+    linear_map.quot_ker_equiv_range (sqrt' (T† * T)),
+  let same_quot : (E ⧸ (sqrt' (T† * T)).ker) ≃ₗ[𝕜] (E ⧸ T.ker) :=
+    submodule.quot_equiv_of_eq (sqrt' (T† * T)).ker T.ker (ker_eq_sqrt_ker T).symm,
   exact (Q_first.symm).trans (same_quot.trans (T_first)),
-end
+end,
+  norm_map' :=
+  begin
+    intro x,
+    have x_mem : ↑x ∈ (sqrt' (T† * T)).range := subtype.mem x,
+    rw linear_map.mem_range at x_mem,
+    choose y hy using x_mem,
+    simp only [linear_equiv.trans_apply, submodule.coe_norm],
+    suffices : (sqrt' (T† * T)).quot_ker_equiv_range.symm x = (sqrt' (T† * T)).ker.mkq y,
+    rw [this, ← hy],
+    simp only [linear_map.quot_ker_equiv_range_apply_mk, submodule.mkq_apply, submodule.quot_equiv_of_eq_mk],
+    exact (sq_eq_sq (norm_nonneg _) (norm_nonneg _)).1 (norm_apply_eq_norm_sqrt_apply T y),
+    rw ← linear_map.quot_ker_equiv_range_symm_apply_image,
+    congr,
+    simp only [set_like.eta, hy],
+    simp only [exists_apply_eq_apply, linear_map.mem_range],
+  end,
+}
 
 
-lemma lem_7_45_1: ∀ v : ℂ^n, (T v : ℂ^n) = (S₁ T) ((linear_map.range_restrict R) v) :=
+lemma S₁_map_to_sqrt_gram (T : E →ₗ[𝕜] E): ∀ x : E, T x = S₁ ((linear_map.range_restrict (sqrt' (T† * T))) x) :=
 begin
   intro v,
   rw S₁,
-  simp,
-  have : (linear_map.quot_ker_equiv_range R).symm (linear_map.range_restrict R v) = (R).ker.mkq v :=
+  simp only [linear_equiv.trans_apply, linear_isometry_equiv.coe_mk],
+  have : (linear_map.quot_ker_equiv_range (sqrt' (T† * T))).symm (linear_map.range_restrict (sqrt' (T† * T)) v) = (sqrt' (T† * T)).ker.mkq v :=
   begin
-    rw ← linear_map.quot_ker_equiv_range_symm_apply_image R,
+    rw ← linear_map.quot_ker_equiv_range_symm_apply_image (sqrt' (T† * T)),
     congr',
   end,
   rw this,
-  simp,
+  simp only [linear_map.quot_ker_equiv_range_apply_mk,
+ submodule.mkq_apply,
+ submodule.quot_equiv_of_eq_mk],
 end
 
--- Presumably there's a thing in mathlib to do this already, but I haven't been able to find it
-lemma pullback_term (z : linear_map.range R) : ∃ x : ℂ^n, z = linear_map.range_restrict (R) x :=
-begin
-  have : ∃ x : ℂ^n, (set.range_factorization R) x = z,
-  begin
-    apply set.surjective_onto_range,
-  end,
-  cases this with x hₓ,
-  use x,
-  rw ← hₓ,
-  congr',
-end
-
-
-lemma S_1_preserves_norm_sq (z : linear_map.range R) : ∥ (z : ℂ^n) ∥^2 = ∥ (((S₁ T) z) : ℂ^n) ∥^2  :=
-begin
-  cases (pullback_term T z) with x hₓ,
-  rw hₓ,
-  rw ← lem_7_45_1 T x,
-  rw eq_7_46,
-  congr',
-end
-
-lemma S_1_preserves_norm' (z : linear_map.range R) : ∥ (z : ℂ^n) ∥ = ∥ (((S₁ T) z) : ℂ^n) ∥  :=
-begin
-  calc ∥ z ∥ = real.sqrt (∥ z ∥^2) : by {rw real.sqrt_sq (norm_nonneg z)}
-  ...        = real.sqrt (∥ (((S₁ T) z) : ℂ^n) ∥^2 ) : by {rw ← S_1_preserves_norm_sq T z, congr}
-  ...        = ∥ (S₁ T) z ∥ : by {rw ← real.sqrt_sq (norm_nonneg ((S₁ T) z)), congr'},
-
-end
-
-lemma S_1_preserves_norm (z : linear_map.range R) : ∥ z ∥ = ∥ (S₁ T) z ∥ :=
-begin
-  calc ∥ z ∥ = ∥ (z : ℂ^n) ∥ : by {congr'}
-  ...       = ∥ (((S₁ T) z) : ℂ^n) ∥ : S_1_preserves_norm' T z
-  ...       = ∥ (S₁ T) z ∥ : by {congr'},
-end
-
-
-lemma isometry_if_preserves_norm {A B : submodule ℂ ℂ^n} (f : A →ₗ[ℂ] B) (h : ∀ z : A, ∥ z ∥ = ∥ f z ∥) : ∀ x y : A, ⟪ f x, f y ⟫_ℂ = ⟪ x , y ⟫_ℂ :=
-begin
-  intros x y,
-  rw inner_eq_sum_norm_sq_div_four (f x) (f y),
-  rw inner_eq_sum_norm_sq_div_four x y,
-  simp only [is_R_or_C.I_to_complex],
-  rw [← linear_map.map_smul, ← map_add, ← map_sub, ← map_add, ← map_sub],
-  iterate {rw h},
-end
-
-lemma lem_7_45_2 : ∃ S₁' : linear_isometry_equiv (ring_hom.id ℂ) (R).range T.range, ∀ v : ℂ^n,
-    (S₁' ((linear_map.range_restrict R) v): ℂ^n) = T v :=
-  begin
-    have fact_isometry : ∀ x y : (R).range, ⟪ (S₁ T) x, (S₁ T) y ⟫_ℂ = ⟪ x , y⟫_ℂ :=
-    begin
-      exact isometry_if_preserves_norm ((S₁ T).to_linear_map) (S_1_preserves_norm T),
-    end,
-    let S₁' := linear_equiv.isometry_of_inner (S₁ T) fact_isometry,
-    have : S₁'.to_linear_equiv = S₁ T :=
-    begin
-      rw linear_equiv.isometry_of_inner_to_linear_equiv,
-    end,
-    use S₁',
-    intro v,
-    simp only [linear_equiv.coe_isometry_of_inner],
-    rw lem_7_45_1,
-  end
-
-
+-- extension still wants the new version of isometry_extend.
 lemma lem_7_45 : ∃ (S : linear_isometry (ring_hom.id ℂ) (ℂ^n) (ℂ^n)), ∀ v : ℂ^n, (T v = S (R v)) :=
 begin
   have key := lem_7_45_2 T,
@@ -199,4 +136,4 @@ begin
  rw hS₁ v,
 end
 
-
+end inner_product_space

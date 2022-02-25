@@ -14,7 +14,7 @@ variables {n : ℕ} (T : Lℂ^n)
 open_locale big_operators complex_conjugate matrix
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
-
+namespace inner_product_space
 
 /-
 The Gram operator is self-adjoint
@@ -43,4 +43,6 @@ The Gram operator has a square root
 -/
 lemma sqrt_gram_exists :
   ∃ (R : Lℂ^n), (R^2 = T† * T) ∧ (inner_product_space.is_self_adjoint R) ∧ (is_positive R) := 
-    sqrt_exists (T† * T) (gram_sa _) (gram_pos _)
+    sqrt_exists (gram_sa _) (gram_pos _)
+  
+end inner_product_space
