@@ -12,9 +12,29 @@ variables {T : E →ₗ[𝕜] E}
 local notation `⟪`x`, `y`⟫` := @inner 𝕜 _ _ x y
 namespace inner_product_space
 
-lemma gram_sa (T : E →ₗ[𝕜] E): is_self_adjoint (T† * T) := sorry
+-- below three lemmas are current PRs, here only for refactor
+lemma is_self_adjoint_adjoint_mul_self (T : E →ₗ[𝕜] E) : is_self_adjoint (T.adjoint * T) :=
+λ x y, by simp only [linear_map.mul_apply, linear_map.adjoint_inner_left,
+  linear_map.adjoint_inner_right]
 
-lemma gram_nn (T : E →ₗ[𝕜] E): ∀ (i : (fin n)), (gram_sa T).eigenvalues hn i ≥ 0 := sorry
+lemma re_inner_adjoint_mul_self_nonneg (T : E →ₗ[𝕜] E) (x : E) :
+  0 ≤ is_R_or_C.re ⟪ x, (T.adjoint * T) x ⟫ := by {simp only [linear_map.mul_apply,
+  linear_map.adjoint_inner_right, inner_self_eq_norm_sq_to_K], norm_cast, exact sq_nonneg _}
+
+lemma has_eigenvalue_eigenvalues (hT: is_self_adjoint T) (i : fin n) :
+  module.End.has_eigenvalue T (hT.eigenvalues hn i) :=
+  module.End.has_eigenvalue_of_has_eigenvector (hT.has_eigenvector_eigenvector_basis hn i)
+-- above three lemmas are current PRs, here only for refactor
+
+lemma gram_sa (T : E →ₗ[𝕜] E): is_self_adjoint (T† * T) := is_self_adjoint_adjoint_mul_self T
+
+lemma gram_nn (T : E →ₗ[𝕜] E): ∀ (i : (fin n)), 0 ≤ (gram_sa T).eigenvalues hn i :=
+begin
+  intro i,
+  let := has_eigenvalue_eigenvalues hn (gram_sa T) i,
+  apply eigenvalue_nonneg_of_nonneg (has_eigenvalue_eigenvalues hn (gram_sa T) i),
+  apply re_inner_adjoint_mul_self_nonneg,
+end
 
 /-- The square root of `T† * T` applied to any element has the same norm as just applying `T`. -/
 lemma norm_apply_eq_norm_sqrt_apply (T : E →ₗ[𝕜] E): ∀ (v : E), ∥ T v ∥^2 = ∥ ((gram_sa T).sqrt hn) v ∥^2 :=
