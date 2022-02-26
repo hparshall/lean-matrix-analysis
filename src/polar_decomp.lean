@@ -46,38 +46,36 @@ begin
     linear_map.adjoint_inner_right, norm_sq_eq_inner],
 end
 
-lemma ker_eq_sqrt_ker (T : E →ₗ[𝕜] E) : T.ker = (sqrt' (T† * T)).ker :=
+lemma ker_eq_sqrt_ker (T : E →ₗ[𝕜] E) : T.ker = ((gram_sa T).sqrt hn).ker :=
 begin
   ext,
-  rw [linear_map.mem_ker, linear_map.mem_ker, ← @norm_eq_zero _ _ (T x), ← @norm_eq_zero _ _ (sqrt' (T† * T) x)],
-  rw (sq_eq_sq (norm_nonneg _) (norm_nonneg _)).1 (norm_apply_eq_norm_sqrt_apply T x),
+  rw [linear_map.mem_ker, linear_map.mem_ker, ← @norm_eq_zero _ _ (T x), ← @norm_eq_zero _ _ ((gram_sa T).sqrt hn x)],
+  rw (sq_eq_sq (norm_nonneg _) (norm_nonneg _)).1 (norm_apply_eq_norm_sqrt_apply hn T x),
 end
 
 /-- The isometry between the range of `sqrt (T† * T)` and the range of `T` given by:
   1. pulling back the range of `sqrt (T† * T)` to `E ⧸ (sqrt (T† *T )).ker`,
   2. identifying the kernels of `sqrt(T† * T)` and `T`,
   3. pushing forward from `E ⧸ T.ker` to `T.range`. -/
-noncomputable def S₁ : ↥(sqrt' (T† * T)).range ≃ₗᵢ[𝕜] ↥(T.range) :=
+noncomputable def S₁ : ↥((gram_sa T).sqrt hn).range ≃ₗᵢ[𝕜] ↥(T.range) :=
 { to_linear_equiv :=
 begin
   let T_first : (E ⧸  T.ker) ≃ₗ[𝕜] T.range := linear_map.quot_ker_equiv_range T,
-  let Q_first : (E ⧸  (sqrt' (T† * T)).ker) ≃ₗ[𝕜] (sqrt' (T† * T)).range :=
-    linear_map.quot_ker_equiv_range (sqrt' (T† * T)),
-  let same_quot : (E ⧸ (sqrt' (T† * T)).ker) ≃ₗ[𝕜] (E ⧸ T.ker) :=
-    submodule.quot_equiv_of_eq (sqrt' (T† * T)).ker T.ker (ker_eq_sqrt_ker T).symm,
+  let Q_first : (E ⧸  ((gram_sa T).sqrt hn).ker) ≃ₗ[𝕜] ((gram_sa T).sqrt hn).range :=
+    linear_map.quot_ker_equiv_range ((gram_sa T).sqrt hn),
+  let same_quot : (E ⧸ ((gram_sa T).sqrt hn).ker) ≃ₗ[𝕜] (E ⧸ T.ker) :=
+    submodule.quot_equiv_of_eq ((gram_sa T).sqrt hn).ker T.ker (ker_eq_sqrt_ker hn T).symm,
   exact (Q_first.symm).trans (same_quot.trans (T_first)),
 end,
   norm_map' :=
   begin
     intro x,
-    have x_mem : ↑x ∈ (sqrt' (T† * T)).range := subtype.mem x,
-    rw linear_map.mem_range at x_mem,
-    choose y hy using x_mem,
+    choose y hy using linear_map.mem_range.1 (subtype.mem x),
     simp only [linear_equiv.trans_apply, submodule.coe_norm],
-    suffices : (sqrt' (T† * T)).quot_ker_equiv_range.symm x = (sqrt' (T† * T)).ker.mkq y,
+    suffices : ((gram_sa T).sqrt hn).quot_ker_equiv_range.symm x = ((gram_sa T).sqrt hn).ker.mkq y,
     rw [this, ← hy],
     simp only [linear_map.quot_ker_equiv_range_apply_mk, submodule.mkq_apply, submodule.quot_equiv_of_eq_mk],
-    exact (sq_eq_sq (norm_nonneg _) (norm_nonneg _)).1 (norm_apply_eq_norm_sqrt_apply T y),
+    exact (sq_eq_sq (norm_nonneg _) (norm_nonneg _)).1 (norm_apply_eq_norm_sqrt_apply hn T y),
     rw ← linear_map.quot_ker_equiv_range_symm_apply_image,
     congr,
     simp only [set_like.eta, hy],
@@ -86,16 +84,13 @@ end,
 }
 
 
-lemma S₁_map_to_sqrt_gram (T : E →ₗ[𝕜] E): ∀ x : E, T x = S₁ ((linear_map.range_restrict (sqrt' (T† * T))) x) :=
+lemma S₁_map_to_sqrt_gram (T : E →ₗ[𝕜] E) : 
+  ∀ x : E, T x = S₁ hn ((linear_map.range_restrict ((gram_sa T).sqrt hn)) x) :=
 begin
   intro v,
-  rw S₁,
-  simp only [linear_equiv.trans_apply, linear_isometry_equiv.coe_mk],
-  have : (linear_map.quot_ker_equiv_range (sqrt' (T† * T))).symm (linear_map.range_restrict (sqrt' (T† * T)) v) = (sqrt' (T† * T)).ker.mkq v :=
-  begin
-    rw ← linear_map.quot_ker_equiv_range_symm_apply_image (sqrt' (T† * T)),
-    congr',
-  end,
+  simp only [S₁, linear_equiv.trans_apply, linear_isometry_equiv.coe_mk],
+  have : (linear_map.quot_ker_equiv_range ((gram_sa T).sqrt hn)).symm (linear_map.range_restrict ((gram_sa T).sqrt hn) v) = ((gram_sa T).sqrt hn).ker.mkq v :=
+    by { rw ← linear_map.quot_ker_equiv_range_symm_apply_image ((gram_sa T).sqrt hn), congr' },
   rw this,
   simp only [linear_map.quot_ker_equiv_range_apply_mk,
  submodule.mkq_apply,
