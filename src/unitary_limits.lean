@@ -1,27 +1,8 @@
 import analysis.inner_product_space.adjoint
-import analysis.inner_product_space.pi_L2
 
 variables {𝕜 E : Type*} [is_R_or_C 𝕜] [inner_product_space 𝕜 E] [complete_space E]
 
-instance : has_continuous_mul (E →L[𝕜] E) := semi_normed_ring_top_monoid
-
 open_locale big_operators matrix topological_space
-
-lemma bound (U : (E →L[𝕜] E)) (hU : U ∈ unitary (E →L[𝕜] E)) : ∥U∥ ≤ 1 :=
-begin
-  apply continuous_linear_map.op_norm_le_bound,
-  norm_num,
-  intro x,
-  simp only [one_mul],
-  apply le_of_pow_le_pow 2 _ _ _,
-  simp only [norm_nonneg],
-  norm_num,
-  rw norm_sq_eq_inner,
-  rw ← continuous_linear_map.adjoint_inner_left,
-  rw unitary.mem_iff at hU,
-  rw ← continuous_linear_map.star_eq_adjoint,
-  sorry,
-end
 
 lemma seq_unitary_tendsto_unitary {A : ℕ → (E →L[𝕜] E)} {L : (E →L[𝕜] E)}
   (hA : ∀ (i : ℕ), A i ∈ unitary (E →L[𝕜] E)) (hL : filter.tendsto A filter.at_top (𝓝 L)) :
