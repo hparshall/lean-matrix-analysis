@@ -1,58 +1,29 @@
-import .gram_sqrt
+-- import .gram_sqrt
 import .isometry_extend
+import .square_root_def
 
 localized "postfix `†`:1000 := linear_map.adjoint" in src
 -- variable {n : ℕ}
 -- variable T : Lℂ^n
 variables {𝕜 : Type*} [is_R_or_C 𝕜]
-variables {n : ℕ} {E : Type*} [inner_product_space 𝕜 E] [finite_dimensional 𝕜 E]
+variables {E : Type*} [inner_product_space 𝕜 E] [finite_dimensional 𝕜 E] [decidable_eq 𝕜]
+variables {n : ℕ} (hn : finite_dimensional.finrank 𝕜 E = n)
 variables {T : E →ₗ[𝕜] E}
 local notation `⟪`x`, `y`⟫` := @inner 𝕜 _ _ x y
 namespace inner_product_space
 
-def is_positive' (T : E →ₗ[𝕜] E) : Prop := 
-  ∀ x : E, (is_R_or_C.re ⟪T x, x⟫ ≥ 0)
+lemma gram_sa (T : E →ₗ[𝕜] E): is_self_adjoint (T† * T) := sorry
 
--- noncomputable def sqrt' (T : Lℂ^n) : Lℂ^n := classical.some (sqrt_gram_exists T)
-def sqrt' (T : E →ₗ[𝕜] E) : E →ₗ[𝕜] E := sorry
-
--- local notation `R` := (sqrt' T)
-
--- lemma R_sa : is_sa R :=
--- begin
---   have : (R^2 = T† * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
---   exact this.2.1,
--- end
-
-lemma sqrt'_is_self_adjoint (T : E →ₗ[𝕜] E) : is_self_adjoint (sqrt' T) := sorry
-lemma sqrt'_sq (T : E →ₗ[𝕜] E) : (sqrt' T) * (sqrt' T) = T  := sorry
-lemma sqrt'_pos (T : E →ₗ[𝕜] E) : is_positive' (sqrt' T) := sorry
-
--- lemma R_mul_mul : R * R = T† * T :=
--- begin
---   have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
---   exact this.1,
--- end
-
--- lemma R_pos : is_positive R :=
--- begin
---   have : (R^2 = T.adjoint * T) ∧ (is_sa R) ∧ (is_positive R) := classical.some_spec (sqrt_gram_exists T),
---   exact this.2.2,
--- end
+lemma gram_nn (T : E →ₗ[𝕜] E): ∀ (i : (fin n)), (gram_sa T).eigenvalues hn i ≥ 0 := sorry
 
 /-- The square root of `T† * T` applied to any element has the same norm as just applying `T`. -/
-lemma norm_apply_eq_norm_sqrt_apply (T : E →ₗ[𝕜] E): ∀ (v : E), ∥ T v ∥^2 = ∥ (sqrt' (T† * T)) v ∥^2 :=
+lemma norm_apply_eq_norm_sqrt_apply (T : E →ₗ[𝕜] E): ∀ (v : E), ∥ T v ∥^2 = ∥ ((gram_sa T).sqrt hn) v ∥^2 :=
 begin
   intro v,
-  apply is_R_or_C.of_real_inj.1,
-  calc ↑(∥ T v ∥^2) = ⟪ T v , T v ⟫ : by {rw inner_self_eq_norm_sq_to_K, norm_cast}
-    ...          = ⟪ T† (T v), v ⟫ : by {rw linear_map.adjoint_inner_left}
-    ...          = ⟪ (T† * T) v, v ⟫ : by {rw linear_map.mul_apply}
-    ...          = ⟪ (sqrt' (T† * T) * (sqrt' (T† * T))) v, v ⟫ : by {rw sqrt'_sq (T† * T)}
-    ...          = ⟪ sqrt' (T† * T) v, sqrt' (T† * T) v ⟫ : 
-      by {rw linear_map.mul_apply, rw ← linear_map.adjoint_inner_left,
-        rw ← (linear_map.is_self_adjoint_iff_eq_adjoint (sqrt' (T† * T))).1 (sqrt'_is_self_adjoint (T†*T))}
-    ...          = ↑(∥ sqrt' (T† * T) v ∥^2) : by {rw inner_self_eq_norm_sq_to_K, norm_cast},
+  nth_rewrite 1 norm_sq_eq_inner,
+  rw [(gram_sa T).sqrt_self_adjoint, ← linear_map.mul_apply,
+    (gram_sa T).sqrt_mul_self_eq hn (gram_nn hn T), linear_map.mul_apply,
+    linear_map.adjoint_inner_right, norm_sq_eq_inner],
 end
 
 lemma ker_eq_sqrt_ker (T : E →ₗ[𝕜] E) : T.ker = (sqrt' (T† * T)).ker :=
